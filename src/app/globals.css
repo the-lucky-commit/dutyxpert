@@ -1,0 +1,192 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0A1628;
+  --foreground: #E2E8F0;
+  
+  --primary: #0A1628;
+  --primary-foreground: #E2E8F0;
+  
+  --secondary: #121F33;
+  --secondary-foreground: #E2E8F0;
+  
+  --accent: #E8C547;
+  --accent-foreground: #0A1628;
+  
+  --surface: #0F1B2E;
+  --surface-elevated: #162236;
+  
+  --neutral-bg: #0D1825;
+  --muted: #94A3B8;
+  --muted-foreground: #CBD5E1;
+  
+  --card: #121F33;
+  --card-foreground: #E2E8F0;
+  
+  --border: rgba(255, 255, 255, 0.08);
+  --input: #162236;
+  --ring: #E8C547;
+  
+  --radius: 0.625rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-neutral-bg: var(--neutral-bg);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --font-sans: 'Inter', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Inter', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Selection */
+::selection {
+  background: rgba(232, 197, 71, 0.25);
+  color: #ffffff;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', 'Noto Sans Thai', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Premium Glassmorphism */
+.glassmorphism {
+  background: rgba(10, 22, 40, 0.85);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Gold Button */
+.btn-gold {
+  background: linear-gradient(135deg, #E8C547 0%, #D4A82A 100%);
+  color: #0A1628;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px 0 rgba(232, 197, 71, 0.2);
+}
+
+.btn-gold:hover {
+  background: linear-gradient(135deg, #F0D060 0%, #E8C547 100%);
+  box-shadow: 0 8px 30px 0 rgba(232, 197, 71, 0.35);
+  transform: translateY(-2px);
+}
+
+.btn-gold:active {
+  transform: translateY(0);
+}
+
+/* Section Gradient Overlays */
+.hero-overlay {
+  background: linear-gradient(180deg, 
+    rgba(10, 22, 40, 0.7) 0%, 
+    rgba(10, 22, 40, 0.4) 40%,
+    rgba(10, 22, 40, 0.8) 100%
+  );
+}
+
+.hero-overlay-strong {
+  background: linear-gradient(180deg, 
+    rgba(10, 22, 40, 0.85) 0%, 
+    rgba(10, 22, 40, 0.6) 40%,
+    rgba(10, 22, 40, 0.92) 100%
+  );
+}
+
+/* Subtle Glow Effects */
+.glow-accent {
+  box-shadow: 0 0 60px rgba(232, 197, 71, 0.08);
+}
+
+.glow-accent-strong {
+  box-shadow: 0 0 120px rgba(232, 197, 71, 0.12);
+}
+
+/* Card Hover */
+.card-hover {
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.card-hover:hover {
+  border-color: rgba(232, 197, 71, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transform: translateY(-4px);
+}
+
+/* Divider Line */
+.accent-line {
+  width: 48px;
+  height: 3px;
+  background: linear-gradient(90deg, #E8C547, transparent);
+  border-radius: 2px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0A1628;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1E3050;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2A4060;
+}
+
+/* Smooth animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes subtle-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.animate-subtle-pulse {
+  animation: subtle-pulse 3s ease-in-out infinite;
+}
