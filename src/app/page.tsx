@@ -49,11 +49,11 @@ export default function Home() {
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden -mt-20 lg:-mt-[104px]">
         {/* Background Image */}
         <Image
-          src="https://dutyxpert.com/wp-content/uploads/2025/11/line_album_ai_251210_6.jpg"
-          alt="เจ้าหน้าที่รักษาความปลอดภัย ดิวตี้ เอคซ์เพิร์ท"
+          src="https://dutyxpert.com/wp-content/uploads/2025/02/line_album_2042025_250421_77.jpg"
+          alt="เจ้าหน้าที่สายตรวจ ดิวตี้ เอคซ์เพิร์ท"
           fill
           priority
-          sizes="100vw"
+          unoptimized
           className="object-cover object-center"
         />
         {/* Overlay */}
