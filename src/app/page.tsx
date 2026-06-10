@@ -54,10 +54,10 @@ export default function Home() {
           fill
           priority
           sizes="100vw"
-          className="object-cover object-top"
+          className="object-cover object-center"
         />
         {/* Overlay */}
-        <div className="absolute inset-0 hero-overlay-strong" />
+        <div className="absolute inset-0 hero-overlay" />
 
         {/* Content */}
         <div className="relative z-10 max-w-5xl mx-auto px-6 text-center py-32">
