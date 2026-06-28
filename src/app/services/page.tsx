@@ -11,21 +11,12 @@ import {
   Users,
   Building2,
   FileText,
-  Eye,
   Award,
   CheckCircle,
   ArrowRight
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/context/language-context"
-
-// Animation Configuration
-const fadeInUp = {
-  initial: { opacity: 0, y: 25 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-50px" },
-  transition: { duration: 0.6, ease: "easeOut" as const }
-}
 
 export default function ServicesPage() {
   const { t } = useLanguage()
@@ -36,7 +27,7 @@ export default function ServicesPage() {
       title: t("services.service1Title"),
       titleTh: t("services.service1TitleTh"),
       icon: ShieldCheck,
-      imageUrl: "https://dutyxpert.com/wp-content/uploads/2025/11/line_album_ai_251210_6.jpg",
+      imageUrl: "/images/training-team.jpg",
       description: t("services.service1Desc"),
       standards: [
         t("services.service1Std1"),
@@ -51,7 +42,7 @@ export default function ServicesPage() {
       title: t("services.service2Title"),
       titleTh: t("services.service2TitleTh"),
       icon: Clock,
-      imageUrl: "https://dutyxpert.com/wp-content/uploads/2025/02/line_album_2042025_250421_77.jpg",
+      imageUrl: "/images/patrol-team.jpg",
       description: t("services.service2Desc"),
       standards: [
         t("services.service2Std1"),
@@ -66,7 +57,7 @@ export default function ServicesPage() {
       title: t("services.service3Title"),
       titleTh: t("services.service3TitleTh"),
       icon: FileText,
-      imageUrl: "https://dutyxpert.com/wp-content/uploads/2025/04/73787.jpg",
+      imageUrl: "/images/security-guard.jpg",
       description: t("services.service3Desc"),
       standards: [
         t("services.service3Std1"),
@@ -81,7 +72,7 @@ export default function ServicesPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* 1. Header Banner */}
-      <section className="bg-primary text-white py-24 relative overflow-hidden">
+      <section className="bg-primary text-white py-24 md:py-28 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
         <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
         
@@ -90,11 +81,11 @@ export default function ServicesPage() {
             <Shield className="size-4 text-accent" />
             {t("services.heroTag")}
           </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight">
             {t("services.heroTitle")}
           </h1>
           <div className="w-16 h-1 bg-accent mt-4" />
-          <p className="text-slate-350 mt-4 text-sm md:text-base max-w-2xl leading-relaxed font-normal">
+          <p className="text-slate-350 mt-5 text-base md:text-lg max-w-3xl leading-relaxed font-normal">
             {t("services.heroDesc")}
           </p>
         </div>
@@ -126,56 +117,56 @@ export default function ServicesPage() {
             <section
               key={service.id}
               id={service.id}
-              className={`py-20 scroll-mt-28 ${isLight ? "bg-white text-slate-900 border-b border-slate-100" : "bg-secondary text-white"}`}
+              className={`py-24 md:py-28 scroll-mt-28 ${isLight ? "bg-white text-slate-900 border-b border-slate-100" : "bg-secondary text-white"}`}
             >
-              <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+              <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
                 {/* Content block */}
                 <motion.div
                   initial={{ opacity: 0, y: 25 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.6, ease: "easeOut" }}
-                  className={`lg:col-span-7 flex flex-col gap-6 ${!isEven ? "lg:order-2" : ""}`}
+                  className={`lg:col-span-7 flex flex-col gap-7 ${!isEven ? "lg:order-2" : ""}`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`p-3 rounded-lg w-fit ${isLight ? "bg-primary/5 text-primary" : "bg-primary text-accent"}`}>
-                      <IconComponent className="size-6" />
+                    <div className={`p-4 rounded-xl w-fit ${isLight ? "bg-primary/5 text-primary" : "bg-primary text-accent"}`}>
+                      <IconComponent className="size-7" />
                     </div>
                     <div>
-                      <span className={`text-[10px] font-bold uppercase tracking-widest block font-semibold ${isLight ? "text-primary" : "text-accent"}`}>{t("services.heroTag")} {idx + 1}</span>
-                      <h2 className={`text-xl md:text-2xl font-extrabold tracking-tight mt-0.5 font-bold ${isLight ? "text-slate-900" : "text-white"}`}>{service.title}</h2>
+                      <span className={`text-xs font-bold uppercase tracking-widest block ${isLight ? "text-primary" : "text-accent"}`}>{t("services.heroTag")} {idx + 1}</span>
+                      <h2 className={`text-2xl md:text-4xl font-extrabold tracking-tight mt-1 leading-tight ${isLight ? "text-slate-900" : "text-white"}`}>{service.title}</h2>
                     </div>
                   </div>
                   
-                  <h4 className={`text-sm font-bold leading-snug ${isLight ? "text-slate-855" : "text-slate-200"}`}>{service.titleTh}</h4>
+                  <h4 className={`text-lg md:text-2xl font-extrabold leading-snug ${isLight ? "text-slate-855" : "text-slate-200"}`}>{service.titleTh}</h4>
                   
-                  <p className={`text-sm leading-relaxed font-normal ${isLight ? "text-slate-600" : "text-slate-350"}`}>
+                  <p className={`text-base md:text-lg leading-relaxed font-normal ${isLight ? "text-slate-600" : "text-slate-350"}`}>
                     {service.description}
                   </p>
                   
                   {/* Service standards checklists */}
                   <div>
-                    <h5 className={`text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-1.5 font-semibold ${isLight ? "text-slate-900" : "text-white"}`}>
-                      <Award className={`size-4 ${isLight ? "text-primary" : "text-accent"}`} /> {t("services.stdTitle")}
+                    <h5 className={`text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2 ${isLight ? "text-slate-900" : "text-white"}`}>
+                      <Award className={`size-5 ${isLight ? "text-primary" : "text-accent"}`} /> {t("services.stdTitle")}
                     </h5>
-                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {service.standards.map((std, index) => (
-                        <li key={index} className="flex gap-2 items-start">
-                          <CheckCircle className={`size-4 shrink-0 mt-0.5 ${isLight ? "text-primary" : "text-accent"}`} />
-                          <span className={`text-xs leading-relaxed font-normal ${isLight ? "text-slate-600" : "text-slate-355"}`}>{std}</span>
+                        <li key={index} className="flex gap-3 items-start">
+                          <CheckCircle className={`size-5 shrink-0 mt-0.5 ${isLight ? "text-primary" : "text-accent"}`} />
+                          <span className={`text-sm md:text-base leading-relaxed font-normal ${isLight ? "text-slate-600" : "text-slate-355"}`}>{std}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
                   {/* Business value box */}
-                  <div className={`p-5 rounded-xl border flex gap-3.5 items-start ${isLight ? "bg-slate-50 border-slate-200/80" : "bg-surface border-white/[0.08]"}`}>
-                    <div className={`p-2 rounded-md shrink-0 ${isLight ? "bg-primary/5 text-primary" : "bg-accent/15 text-accent"}`}>
-                      <ShieldCheck className="size-5" />
+                  <div className={`p-6 md:p-7 rounded-2xl border flex gap-4 items-start shadow-xs ${isLight ? "bg-slate-50 border-slate-200/80" : "bg-surface border-white/[0.08]"}`}>
+                    <div className={`p-3 rounded-lg shrink-0 ${isLight ? "bg-primary/5 text-primary" : "bg-accent/15 text-accent"}`}>
+                      <ShieldCheck className="size-6" />
                     </div>
                     <div>
-                      <h5 className={`text-xs font-bold uppercase tracking-wider font-semibold ${isLight ? "text-slate-900" : "text-white"}`}>{t("services.valTitle")}</h5>
-                      <p className={`text-xs mt-1 leading-relaxed font-normal ${isLight ? "text-slate-600" : "text-slate-350"}`}>{service.value}</p>
+                      <h5 className={`text-sm font-bold uppercase tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>{t("services.valTitle")}</h5>
+                      <p className={`text-sm md:text-base mt-2 leading-relaxed font-normal ${isLight ? "text-slate-600" : "text-slate-350"}`}>{service.value}</p>
                     </div>
                   </div>
                 </motion.div>
@@ -198,9 +189,9 @@ export default function ServicesPage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent" />
                     
                     <div className="absolute bottom-6 left-6 right-6 z-10">
-                      <div className={`backdrop-blur-xs border p-4 rounded-xl ${isLight ? "bg-slate-50/95 border-slate-200" : "bg-primary/90 border-white/10"}`}>
-                        <span className={`text-[10px] font-bold uppercase tracking-widest block mb-1 ${isLight ? "text-primary" : "text-accent"}`}>{t("services.trustTitle")}</span>
-                        <p className={`text-xs leading-relaxed font-normal ${isLight ? "text-slate-700" : "text-slate-200"}`}>
+                      <div className={`backdrop-blur-xs border p-5 rounded-xl ${isLight ? "bg-slate-50/95 border-slate-200" : "bg-primary/90 border-white/10"}`}>
+                        <span className={`text-xs font-bold uppercase tracking-widest block mb-2 ${isLight ? "text-primary" : "text-accent"}`}>{t("services.trustTitle")}</span>
+                        <p className={`text-sm leading-relaxed font-normal ${isLight ? "text-slate-700" : "text-slate-200"}`}>
                           {t("services.trustText")}
                         </p>
                       </div>
@@ -214,15 +205,15 @@ export default function ServicesPage() {
       </div>
 
       {/* 4. Training Section (Dark) */}
-      <section className="py-20 bg-primary text-white">
+      <section className="py-24 bg-primary text-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="text-xs font-bold text-accent uppercase tracking-widest">{t("services.trainTag")}</span>
-            <h2 className="text-3xl font-extrabold tracking-tight mt-3">
+            <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mt-3 leading-tight">
               {t("services.trainTitle")}
             </h2>
             <div className="w-16 h-1 bg-accent mx-auto mt-4" />
-            <p className="text-slate-355 mt-4 text-xs md:text-sm">
+            <p className="text-slate-355 mt-5 text-base md:text-lg leading-relaxed">
               {t("services.trainDesc")}
             </p>
           </div>
@@ -250,15 +241,15 @@ export default function ServicesPage() {
             ].map((train, idx) => {
               const TrainIcon = train.icon
               return (
-                <div key={idx} className="bg-secondary border border-white/[0.08] rounded-xl p-6 flex flex-col gap-4">
-                  <div className="bg-accent/10 text-accent p-3 rounded-lg w-fit">
-                    <TrainIcon className="size-6 text-accent" />
+                <div key={idx} className="bg-secondary border border-white/[0.08] rounded-2xl p-7 md:p-8 flex flex-col gap-5">
+                  <div className="bg-accent/10 text-accent p-4 rounded-xl w-fit">
+                    <TrainIcon className="size-7 text-accent" />
                   </div>
                   <div>
-                    <span className="text-[10px] text-accent font-semibold block uppercase tracking-wider">{train.title}</span>
-                    <h4 className="font-extrabold text-white text-base mt-1">{train.subtitle}</h4>
+                    <span className="text-xs text-accent font-bold block uppercase tracking-wider">{train.title}</span>
+                    <h4 className="font-extrabold text-white text-xl mt-2 leading-snug">{train.subtitle}</h4>
                   </div>
-                  <p className="text-xs text-slate-350 leading-relaxed font-normal">{train.desc}</p>
+                  <p className="text-base text-slate-350 leading-relaxed font-normal">{train.desc}</p>
                 </div>
               )
             })}
@@ -267,22 +258,22 @@ export default function ServicesPage() {
       </section>
 
       {/* 5. What Customers Get Section (Light) */}
-      <section className="py-20 bg-white text-slate-900 border-b border-slate-100">
+      <section className="py-24 bg-white text-slate-900 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="text-xs font-bold text-primary uppercase tracking-widest">{t("services.deliverTag")}</span>
-            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight mt-3">
+            <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight mt-3 leading-tight">
               {t("services.deliverTitle")}
             </h2>
             <div className="w-16 h-1 bg-accent mx-auto mt-4" />
-            <p className="text-slate-600 mt-4 text-xs md:text-sm">
+            <p className="text-slate-600 mt-5 text-base md:text-lg leading-relaxed">
               {t("services.deliverDesc")}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <div className="space-y-4">
-              <h3 className="font-bold text-slate-900 text-sm border-l-4 border-accent pl-3 uppercase tracking-wider mb-6">{t("services.delCol1Title")}</h3>
+              <h3 className="font-bold text-slate-900 text-base border-l-4 border-accent pl-4 uppercase tracking-wider mb-6">{t("services.delCol1Title")}</h3>
               {[
                 t("services.delCol1Item1"),
                 t("services.delCol1Item2"),
@@ -290,14 +281,14 @@ export default function ServicesPage() {
                 t("services.delCol1Item4")
               ].map((item, idx) => (
                 <div key={idx} className="flex gap-3 items-start">
-                  <CheckCircle className="size-5 text-primary shrink-0 mt-0.5" />
-                  <span className="text-xs text-slate-600 leading-relaxed font-normal">{item}</span>
+                  <CheckCircle className="size-5 text-primary shrink-0 mt-1" />
+                  <span className="text-base text-slate-600 leading-relaxed font-normal">{item}</span>
                 </div>
               ))}
             </div>
 
             <div className="space-y-4">
-              <h3 className="font-bold text-slate-900 text-sm border-l-4 border-accent pl-3 uppercase tracking-wider mb-6">{t("services.delCol2Title")}</h3>
+              <h3 className="font-bold text-slate-900 text-base border-l-4 border-accent pl-4 uppercase tracking-wider mb-6">{t("services.delCol2Title")}</h3>
               {[
                 t("services.delCol2Item1"),
                 t("services.delCol2Item2"),
@@ -305,8 +296,8 @@ export default function ServicesPage() {
                 t("services.delCol2Item4")
               ].map((item, idx) => (
                 <div key={idx} className="flex gap-3 items-start">
-                  <CheckCircle className="size-5 text-primary shrink-0 mt-0.5" />
-                  <span className="text-xs text-slate-600 leading-relaxed font-normal">{item}</span>
+                  <CheckCircle className="size-5 text-primary shrink-0 mt-1" />
+                  <span className="text-base text-slate-600 leading-relaxed font-normal">{item}</span>
                 </div>
               ))}
             </div>
@@ -341,11 +332,11 @@ export default function ServicesPage() {
               }
             ].map((faq, idx) => (
               <div key={idx} className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs">
-                <h4 className="font-extrabold text-slate-900 text-sm md:text-base mb-3 flex items-start gap-2">
-                  <span className="text-accent font-extrabold text-base md:text-lg leading-none select-none">Q:</span>
+                <h4 className="font-extrabold text-slate-900 text-base md:text-lg mb-3 flex items-start gap-2">
+                  <span className="text-accent font-extrabold text-lg md:text-xl leading-none select-none">Q:</span>
                   <span className="font-semibold">{faq.q}</span>
                 </h4>
-                <div className="text-xs md:text-sm text-slate-600 leading-relaxed pl-5 font-normal flex items-start gap-2">
+                <div className="text-sm md:text-base text-slate-600 leading-relaxed pl-5 font-normal flex items-start gap-2">
                   <span className="text-primary font-extrabold leading-none select-none">A:</span>
                   <p>{faq.a}</p>
                 </div>

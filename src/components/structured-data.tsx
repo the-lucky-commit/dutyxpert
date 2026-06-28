@@ -5,23 +5,18 @@ export default function StructuredData() {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "name": "Duty Xpert Security Solutions",
-    "image": "https://dutyxpert.com/images/og-image.jpg",
+    "image": "https://dutyxpert.com/images/patrol-team.jpg",
     "@id": "https://dutyxpert.com/#organization",
     "url": "https://dutyxpert.com",
-    "telephone": "+66-2-XXX-XXXX",
+    "telephone": "+66-86-368-2323",
     "priceRange": "$$$",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "123 อาคารสิริโภค ชั้น 15 ถนนรัชดาภิเษก แขวงจตุจักร",
-      "addressLocality": "เขตจตุจักร",
+      "streetAddress": "225 ถนนสุขุมวิท 105 แขวงบางนาใต้",
+      "addressLocality": "เขตบางนา",
       "addressRegion": "กรุงเทพมหานคร",
-      "postalCode": "10900",
+      "postalCode": "10260",
       "addressCountry": "TH"
-    },
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": 13.8228,
-      "longitude": 100.5674
     },
     "openingHoursSpecification": {
       "@type": "OpeningHoursSpecification",
@@ -30,17 +25,12 @@ export default function StructuredData() {
         "Tuesday",
         "Wednesday",
         "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday"
+        "Friday"
       ],
-      "opens": "00:00",
-      "closes": "23:59"
+      "opens": "08:30",
+      "closes": "17:00"
     },
-    "sameAs": [
-      "https://www.facebook.com/dutyxpert",
-      "https://www.linkedin.com/company/dutyxpert"
-    ]
+    "sameAs": ["https://www.facebook.com/dutyxpert"]
   }
 
   return (

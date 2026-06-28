@@ -4,7 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { Shield, ShieldCheck, Award, CheckCircle, ChevronRight, Target, Eye, Building } from "lucide-react"
+import { ShieldCheck, Award, CheckCircle, ChevronRight, Target, Eye, Building } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/context/language-context"
 
@@ -84,7 +84,7 @@ export default function AboutPage() {
           <motion.div {...fadeInUp} className="lg:col-span-5 relative">
             <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden shadow-xl border border-slate-200">
               <Image
-                src="https://dutyxpert.com/wp-content/uploads/2025/11/222.jpg"
+                src="/images/about-team.jpg"
                 alt="พนักงานรักษาความปลอดภัย บริษัท รักษาความปลอดภัย ดิวตี้ เอคซ์เพิร์ท จำกัด"
                 fill
                 sizes="(max-width: 1024px) 100vw, 40vw"
@@ -120,25 +120,25 @@ export default function AboutPage() {
                 step: "01",
                 title: t("about.step1Title"),
                 desc: t("about.step1Desc"),
-                icon: "https://dutyxpert.com/wp-content/uploads/2025/11/questionnaire.png"
+                icon: "/images/process-questionnaire.png"
               },
               {
                 step: "02",
                 title: t("about.step2Title"),
                 desc: t("about.step2Desc"),
-                icon: "https://dutyxpert.com/wp-content/uploads/2025/11/data-analysis.png"
+                icon: "/images/process-analysis.png"
               },
               {
                 step: "03",
                 title: t("about.step3Title"),
                 desc: t("about.step3Desc"),
-                icon: "https://dutyxpert.com/wp-content/uploads/2025/11/money.png"
+                icon: "/images/process-pricing.png"
               },
               {
                 step: "04",
                 title: t("about.step4Title"),
                 desc: t("about.step4Desc"),
-                icon: "https://dutyxpert.com/wp-content/uploads/2025/11/customization.png"
+                icon: "/images/process-customization.png"
               }
             ].map((item, idx) => (
               <div key={idx} className="bg-white border border-slate-200/80 rounded-xl p-6 relative hover:shadow-md hover:border-accent/40 transition-all duration-300 flex flex-col items-center text-center">

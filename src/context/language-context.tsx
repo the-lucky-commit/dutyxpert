@@ -2,9 +2,9 @@
 
 import * as React from "react"
 import defaultTranslations from "@/lib/translations.json"
+import type { TranslationsDict } from "@/lib/data-store"
 
 type Language = "th" | "en"
-type TranslationsDict = typeof defaultTranslations
 
 interface LanguageContextType {
   language: Language
@@ -14,75 +14,67 @@ interface LanguageContextType {
   translations: TranslationsDict
 }
 
+const LANGUAGE_STORAGE_KEY = "dxs-lang"
+const LANGUAGE_CHANGE_EVENT = "dxs-language-change"
 const LanguageContext = React.createContext<LanguageContextType | undefined>(undefined)
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = React.useState<Language>("th")
-  const [translations, setTranslations] = React.useState<TranslationsDict>(defaultTranslations)
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+}
 
-  // Load language preference from LocalStorage
-  React.useEffect(() => {
-    const savedLang = localStorage.getItem("dxs-lang") as Language
-    if (savedLang === "th" || savedLang === "en") {
-      setLanguageState(savedLang)
-    }
+function subscribeToLanguage(callback: () => void) {
+  window.addEventListener("storage", callback)
+  window.addEventListener(LANGUAGE_CHANGE_EVENT, callback)
+  return () => {
+    window.removeEventListener("storage", callback)
+    window.removeEventListener(LANGUAGE_CHANGE_EVENT, callback)
+  }
+}
 
-    // Proactively fetch updated translations from API route (to reflect Admin changes)
-    const fetchTranslations = async () => {
-      try {
-        const res = await fetch("/api/translations")
-        if (res.ok) {
-          const data = await res.json()
-          setTranslations(data)
-        }
-      } catch (err) {
-        console.error("Failed to fetch translations from API, using defaults:", err)
-      }
-    }
-    fetchTranslations()
+function getLanguageSnapshot(): Language {
+  return localStorage.getItem(LANGUAGE_STORAGE_KEY) === "en" ? "en" : "th"
+}
+
+function getServerLanguageSnapshot(): Language {
+  return "th"
+}
+
+function findTranslation(source: unknown, keyPath: string, language: Language) {
+  let current: unknown = source
+  for (const key of keyPath.split(".")) {
+    if (!isRecord(current) || !(key in current)) return undefined
+    current = current[key]
+  }
+
+  if (!isRecord(current)) return undefined
+  const value = current[language]
+  return typeof value === "string" ? value : undefined
+}
+
+export function LanguageProvider({
+  children,
+  initialTranslations = defaultTranslations,
+}: {
+  children: React.ReactNode
+  initialTranslations?: TranslationsDict
+}) {
+  const language = React.useSyncExternalStore(
+    subscribeToLanguage,
+    getLanguageSnapshot,
+    getServerLanguageSnapshot
+  )
+  const [translations, setTranslations] = React.useState<TranslationsDict>(initialTranslations)
+
+  const setLanguage = React.useCallback((nextLanguage: Language) => {
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, nextLanguage)
+    window.dispatchEvent(new Event(LANGUAGE_CHANGE_EVENT))
   }, [])
 
-  const setLanguage = (lang: Language) => {
-    setLanguageState(lang)
-    localStorage.setItem("dxs-lang", lang)
-  }
-
-  const updateTranslations = (newDict: TranslationsDict) => {
-    setTranslations(newDict)
-  }
-
-  // T Function: retrieve nested translation value
   const t = React.useCallback(
-    (keyPath: string): string => {
-      const keys = keyPath.split(".")
-      let currentObj: any = translations
-
-      for (const key of keys) {
-        if (currentObj && typeof currentObj === "object" && key in currentObj) {
-          currentObj = currentObj[key]
-        } else {
-          // Fallback to default translations
-          let fallbackObj: any = defaultTranslations
-          for (const fallbackKey of keys) {
-            if (fallbackObj && typeof fallbackObj === "object" && fallbackKey in fallbackObj) {
-              fallbackObj = fallbackObj[fallbackKey]
-            } else {
-              fallbackObj = undefined
-              break
-            }
-          }
-          currentObj = fallbackObj
-          break
-        }
-      }
-
-      if (currentObj && typeof currentObj === "object") {
-        const textVal = currentObj[language]
-        if (typeof textVal === "string") return textVal
-      }
-      
-      return keyPath // Fallback if key not found
-    },
+    (keyPath: string) =>
+      findTranslation(translations, keyPath, language) ??
+      findTranslation(defaultTranslations, keyPath, language) ??
+      keyPath,
     [language, translations]
   )
 
@@ -91,10 +83,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       language,
       setLanguage,
       t,
-      updateTranslations,
-      translations
+      updateTranslations: setTranslations,
+      translations,
     }),
-    [language, t, translations]
+    [language, setLanguage, t, translations]
   )
 
   return (

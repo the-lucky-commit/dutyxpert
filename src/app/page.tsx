@@ -49,11 +49,10 @@ export default function Home() {
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden -mt-20 lg:-mt-[104px]">
         {/* Background Image */}
         <Image
-          src="https://dutyxpert.com/wp-content/uploads/2025/02/line_album_2042025_250421_77.jpg"
+          src="/images/patrol-team.jpg"
           alt="เจ้าหน้าที่สายตรวจ ดิวตี้ เอคซ์เพิร์ท"
           fill
           priority
-          unoptimized
           className="object-cover object-center"
         />
         {/* Overlay */}
@@ -111,17 +110,17 @@ export default function Home() {
       </section>
 
       {/* ━━━ 2. SERVICES ━━━ */}
-      <section id="services" className="py-20 md:py-28 bg-white">
-        <div className="max-w-6xl mx-auto px-6">
-          <motion.div {...fadeIn} className="text-center mb-16">
-            <span className="text-xs font-bold text-primary uppercase tracking-widest">{t("home.servicesTag")}</span>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mt-3 tracking-tight">
+      <section id="services" className="py-24 md:py-32 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <motion.div {...fadeIn} className="text-center mb-16 md:mb-20">
+            <span className="text-sm font-bold text-primary uppercase tracking-widest">{t("home.servicesTag")}</span>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mt-4 tracking-tight leading-tight">
               {t("home.servicesTitle")}
             </h2>
-            <div className="accent-line mx-auto mt-5" />
+            <div className="accent-line mx-auto mt-6" />
           </motion.div>
 
-          <motion.div {...stagger} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <motion.div {...stagger} className="grid grid-cols-1 md:grid-cols-3 gap-7 lg:gap-8">
             {[
               {
                 icon: ShieldCheck,
@@ -143,14 +142,14 @@ export default function Home() {
               },
             ].map((s, i) => (
               <motion.div key={i} {...childFade}>
-                <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-7 h-full flex flex-col hover:shadow-md hover:border-accent/40 transition-all duration-300">
-                  <div className="bg-primary/5 w-12 h-12 rounded-lg flex items-center justify-center mb-5">
-                    <s.icon className="size-6 text-primary" />
+                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-8 md:p-9 lg:p-10 h-full min-h-[300px] flex flex-col hover:shadow-lg hover:-translate-y-1 hover:border-accent/40 transition-all duration-300">
+                  <div className="bg-primary/5 w-14 h-14 rounded-xl flex items-center justify-center mb-6">
+                    <s.icon className="size-7 text-primary" />
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-3 leading-snug">{s.title}</h3>
-                  <p className="text-sm text-slate-600 leading-relaxed flex-grow">{s.desc}</p>
-                  <Link href={s.href} className="mt-5 inline-flex items-center gap-1 text-primary text-sm font-semibold hover:text-accent hover:gap-2 transition-all">
-                    {t("home.serviceBtnMore")} <ChevronRight className="size-4" />
+                  <h3 className="text-xl md:text-2xl font-extrabold text-slate-900 mb-4 leading-snug">{s.title}</h3>
+                  <p className="text-base md:text-[17px] text-slate-600 leading-relaxed flex-grow">{s.desc}</p>
+                  <Link href={s.href} className="mt-7 inline-flex items-center gap-1.5 text-primary text-base font-bold hover:text-accent hover:gap-2.5 transition-all">
+                    {t("home.serviceBtnMore")} <ChevronRight className="size-5" />
                   </Link>
                 </div>
               </motion.div>
@@ -166,7 +165,7 @@ export default function Home() {
           <motion.div {...fadeIn} className="relative">
             <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden">
               <Image
-                src="https://dutyxpert.com/wp-content/uploads/2025/04/73787.jpg"
+                src="/images/security-guard.jpg"
                 alt="การปฏิบัติงานจริงของ Duty Xpert"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -239,10 +238,10 @@ export default function Home() {
               { num: "06", title: t("home.p6Title"), desc: t("home.p6Desc") },
             ].map((p, i) => (
               <motion.div key={i} {...childFade}>
-                <div className="bg-white border border-slate-200/80 rounded-xl p-6 h-full hover:shadow-md hover:border-accent/40 transition-all duration-300">
-                  <span className="text-xs font-extrabold text-primary bg-primary/5 px-2.5 py-1 rounded-md inline-block mb-4">{p.num}</span>
-                  <h4 className="font-bold text-slate-900 text-base mb-2">{p.title}</h4>
-                  <p className="text-sm text-slate-600 leading-relaxed font-normal">{p.desc}</p>
+                <div className="bg-white border border-slate-200/80 rounded-xl p-7 h-full hover:shadow-md hover:border-accent/40 transition-all duration-300">
+                  <span className="text-sm font-extrabold text-primary bg-primary/5 px-3 py-1.5 rounded-md inline-block mb-4">{p.num}</span>
+                  <h4 className="font-bold text-slate-900 text-lg mb-3 leading-snug">{p.title}</h4>
+                  <p className="text-base text-slate-600 leading-relaxed font-normal">{p.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -264,7 +263,7 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <motion.div {...fadeIn} className="relative aspect-[16/10] rounded-2xl overflow-hidden group">
               <Image
-                src="https://dutyxpert.com/wp-content/uploads/2025/02/line_album_2042025_250421_77.jpg"
+                src="/images/patrol-team.jpg"
                 alt="สายตรวจ รปภ. ดิวตี้ เอคซ์เพิร์ท"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -278,7 +277,7 @@ export default function Home() {
 
             <motion.div {...fadeIn} className="relative aspect-[16/10] rounded-2xl overflow-hidden group">
               <Image
-                src="https://dutyxpert.com/wp-content/uploads/2025/11/line_album_ai_251210_6.jpg"
+                src="/images/training-team.jpg"
                 alt="เจ้าหน้าที่ดิวตี้ เอคซ์เพิร์ท ปฏิบัติหน้าที่"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"

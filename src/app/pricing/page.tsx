@@ -4,7 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { Shield, ShieldCheck, Award, CheckCircle, ChevronRight, ArrowRight, DollarSign, Calculator, Percent } from "lucide-react"
+import { ShieldCheck, ArrowRight, DollarSign, Calculator, Percent } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/context/language-context"
 
@@ -88,7 +88,7 @@ export default function PricingPage() {
           <motion.div {...fadeInUp} className="lg:col-span-5">
             <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden shadow-xl border border-slate-200">
               <Image
-                src="https://dutyxpert.com/wp-content/uploads/2025/12/line_album_ai_251219_3.jpg"
+                src="/images/pricing-security.jpg"
                 alt="การลงพื้นที่ปฏิบัติงานและวางแผนราคาของ ดิวตี้ เอคซ์เพิร์ท"
                 fill
                 sizes="(max-width: 1024px) 100vw, 40vw"

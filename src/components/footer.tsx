@@ -18,7 +18,6 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 }
 
 export default function Footer() {
-  const currentYear = new Date().getFullYear()
   const { t } = useLanguage()
 
   const quickLinks = [
@@ -45,7 +44,7 @@ export default function Footer() {
             <Link href="/" className="flex items-center gap-3 group w-max">
               <div className="relative size-10 bg-white rounded-full p-0.5 transition-transform group-hover:scale-105 shrink-0">
                 <Image
-                  src="https://dutyxpert.com/wp-content/uploads/2025/02/cropped-dxs_main-logo.png"
+                  src="/images/dutyxpert-logo.png"
                   alt={t("navbar.brand")}
                   width={40}
                   height={40}

@@ -38,12 +38,6 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // Close menus on route change
-  React.useEffect(() => {
-    setIsOpen(false)
-    setIsServicesOpen(false)
-  }, [pathname])
-
   // Close dropdown on outside click
   React.useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -106,7 +100,7 @@ export default function Navbar() {
           <Link href="/" className="flex items-center gap-3 group shrink-0">
             <div className="relative size-9 md:size-10 bg-white rounded-full p-0.5 transition-transform group-hover:scale-105">
               <Image
-                src="https://dutyxpert.com/wp-content/uploads/2025/02/cropped-dxs_main-logo.png"
+                src="/images/dutyxpert-logo.png"
                 alt={t("navbar.brand")}
                 width={40}
                 height={40}
@@ -163,6 +157,7 @@ export default function Navbar() {
                       <Link
                         key={service.name}
                         href={service.href}
+                        onClick={() => setIsServicesOpen(false)}
                         className={cn(
                           "block px-4 py-3 text-sm text-[#94A3B8] hover:bg-[#121F33] hover:text-[#E2E8F0] transition-colors",
                           idx < servicesList.length - 1 &&

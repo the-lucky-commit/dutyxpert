@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { motion } from "framer-motion"
-import { ShieldCheck, Phone, Mail, MapPin, Clock, Check, AlertCircle, Building2, Send } from "lucide-react"
+import Link from "next/link"
+import { Phone, Mail, MapPin, Clock, Check, AlertCircle, Building2, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/context/language-context"
 
@@ -16,7 +16,8 @@ export default function ContactPage() {
     phone: "",
     siteType: "factory",
     subject: "request_proposal",
-    message: ""
+    message: "",
+    website: ""
   })
 
   const [isSubmitting, setIsSubmitting] = React.useState(false)
@@ -41,7 +42,16 @@ export default function ContactPage() {
     }
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      })
+      if (!response.ok) {
+        const result = (await response.json()) as { error?: string }
+        throw new Error(result.error || t("contact.formErrorVal"))
+      }
+
       setSubmitSuccess(true)
       setFormData({
         name: "",
@@ -50,10 +60,11 @@ export default function ContactPage() {
         phone: "",
         siteType: "factory",
         subject: "request_proposal",
-        message: ""
+        message: "",
+        website: ""
       })
-    } catch (err) {
-      setErrorMsg(t("contact.formErrorVal"))
+    } catch (error) {
+      setErrorMsg(error instanceof Error ? error.message : t("contact.formErrorVal"))
     } finally {
       setIsSubmitting(false)
     }
@@ -153,6 +164,18 @@ export default function ContactPage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+                <div className="absolute -left-[10000px]" aria-hidden="true">
+                  <label htmlFor="website">Website</label>
+                  <input
+                    id="website"
+                    name="website"
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={formData.website}
+                    onChange={handleChange}
+                  />
+                </div>
                 <div>
                   <h3 className="text-lg font-bold text-slate-900 mb-1 font-semibold">{t("contact.formTitle")}</h3>
                   <p className="text-xs text-slate-600 font-normal">{t("contact.formDesc")}</p>
@@ -276,6 +299,13 @@ export default function ContactPage() {
                   ></textarea>
                 </div>
 
+                <p className="text-[11px] leading-relaxed text-slate-500">
+                  เมื่อส่งแบบฟอร์มนี้ ท่านรับทราบว่าเราจะใช้ข้อมูลเพื่อดำเนินการตามคำขอและติดต่อกลับตาม{" "}
+                  <Link href="/privacy-policy" className="font-semibold text-primary underline underline-offset-2">
+                    นโยบายความเป็นส่วนตัว
+                  </Link>
+                </p>
+
                 {/* Submit button */}
                 <Button
                   type="submit"
@@ -321,7 +351,7 @@ export default function ContactPage() {
                 </div>
               </div>
               <a
-                href="https://maps.google.com"
+                href="https://www.google.com/maps/search/?api=1&query=225%20Sukhumvit%20105%20Bang%20Na%20Bangkok%2010260"
                 target="_blank"
                 rel="noreferrer"
                 className="bg-secondary hover:bg-secondary/95 border border-white/40 px-3.5 py-1.5 rounded-md text-xs font-bold text-accent uppercase tracking-wider transition-colors"

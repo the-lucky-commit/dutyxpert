@@ -4,7 +4,7 @@ import * as React from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { ShieldAlert, KeyRound, User, ChevronRight, Home, ArrowLeft } from "lucide-react"
+import { ShieldAlert, KeyRound, User, ChevronRight, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export default function LoginPage() {
@@ -14,27 +14,29 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = React.useState("")
   const [isSubmitting, setIsSubmitting] = React.useState(false)
 
-  // Redirect if already logged in
-  React.useEffect(() => {
-    const isLoggedIn = sessionStorage.getItem("dxs-auth")
-    if (isLoggedIn === "granted") {
-      router.push("/admin")
-    }
-  }, [router])
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
     setErrorMsg("")
 
-    // Simulated short delay
-    await new Promise((resolve) => setTimeout(resolve, 800))
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      })
 
-    if (username === "admin" && password === "admin1234") {
-      sessionStorage.setItem("dxs-auth", "granted")
-      router.push("/admin")
-    } else {
-      setErrorMsg("ชื่อผู้ใช้งาน หรือ รหัสผ่าน ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง")
+      if (!response.ok) {
+        const result = (await response.json()) as { error?: string }
+        setErrorMsg(result.error || "ไม่สามารถเข้าสู่ระบบได้ กรุณาลองใหม่อีกครั้ง")
+        return
+      }
+
+      router.replace("/admin")
+      router.refresh()
+    } catch {
+      setErrorMsg("ไม่สามารถเชื่อมต่อระบบเข้าสู่ระบบได้ กรุณาลองใหม่อีกครั้ง")
+    } finally {
       setIsSubmitting(false)
     }
   }
@@ -65,7 +67,7 @@ export default function LoginPage() {
           <div className="flex flex-col items-center text-center gap-4">
             <div className="relative size-14 bg-white rounded-full p-1 shadow-lg shrink-0">
               <Image
-                src="https://dutyxpert.com/wp-content/uploads/2025/02/cropped-dxs_main-logo.png"
+                src="/images/dutyxpert-logo.png"
                 alt="ดิวตี้ เอคซ์เพิร์ท"
                 width={56}
                 height={56}
@@ -107,7 +109,8 @@ export default function LoginPage() {
                   id="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="admin"
+                  placeholder="กรอกชื่อผู้ใช้งาน"
+                  autoComplete="username"
                   className="w-full bg-[#070F1C]/75 border border-white/[0.08] focus:border-accent rounded-lg p-3 pl-10 text-xs text-white placeholder:text-slate-500 focus:outline-none transition-all"
                   required
                 />
@@ -127,6 +130,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
+                  autoComplete="current-password"
                   className="w-full bg-[#070F1C]/75 border border-white/[0.08] focus:border-accent rounded-lg p-3 pl-10 text-xs text-white placeholder:text-slate-500 focus:outline-none transition-all"
                   required
                 />
@@ -144,13 +148,11 @@ export default function LoginPage() {
             </Button>
           </form>
           
-          {/* Simulated Info Box */}
           <div className="bg-white/5 border border-white/[0.04] rounded-lg p-4 text-center">
-            <span className="text-[9px] text-[#94A3B8] font-semibold block uppercase">บัญชีทดสอบสำหรับตรวจ Mockup</span>
-            <div className="flex justify-center gap-4 text-[10px] text-accent font-bold mt-1.5 font-mono">
-              <span>USER: admin</span>
-              <span>PASS: admin1234</span>
-            </div>
+            <span className="text-[9px] text-[#94A3B8] font-semibold block uppercase">สำหรับผู้ดูแลระบบเท่านั้น</span>
+            <p className="text-[10px] text-slate-400 mt-1.5 leading-relaxed">
+              หากลืมรหัสผ่าน กรุณาติดต่อผู้ดูแลระบบหลักเพื่อออกข้อมูลเข้าสู่ระบบใหม่
+            </p>
           </div>
         </div>
       </main>

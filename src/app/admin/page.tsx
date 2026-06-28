@@ -8,7 +8,6 @@ import { useLanguage } from "@/context/language-context"
 import {
   Save,
   LogOut,
-  Settings,
   Globe,
   CheckCircle,
   AlertCircle,
@@ -18,58 +17,49 @@ import {
   FileText
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import type { TranslationsDict } from "@/lib/data-store"
 
 type TabType = "general" | "homepage" | "about" | "services"
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+}
+
 export default function AdminDashboard() {
   const router = useRouter()
-  const { translations, updateTranslations, language } = useLanguage()
-  
-  const [isAuthenticated, setIsAuthenticated] = React.useState(false)
+  const { translations, updateTranslations } = useLanguage()
+
   const [activeTab, setActiveTab] = React.useState<TabType>("general")
-  const [editableDict, setEditableDict] = React.useState<any>(null)
+  const [editableDict, setEditableDict] = React.useState<TranslationsDict>(() =>
+    structuredClone(translations)
+  )
   
   const [isSaving, setIsSaving] = React.useState(false)
   const [saveSuccess, setSaveSuccess] = React.useState(false)
   const [saveError, setSaveError] = React.useState("")
 
-  // Authentication check
-  React.useEffect(() => {
-    const authStatus = sessionStorage.getItem("dxs-auth")
-    if (authStatus !== "granted") {
-      router.push("/login")
-    } else {
-      setIsAuthenticated(true)
-    }
-  }, [router])
-
-  // Sync state with Context translations when loaded
-  React.useEffect(() => {
-    if (translations) {
-      setEditableDict(JSON.parse(JSON.stringify(translations))) // Deep clone
-    }
-  }, [translations])
-
-  const handleLogout = () => {
-    sessionStorage.removeItem("dxs-auth")
-    router.push("/login")
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" })
+    router.replace("/login")
+    router.refresh()
   }
 
   // Handle input changes dynamically nested
   const handleTextChange = (path: string, lang: "th" | "en", val: string) => {
     const paths = path.split(".")
-    setEditableDict((prev: any) => {
-      const cloned = { ...prev }
-      let current = cloned
+    setEditableDict((previous) => {
+      const cloned = structuredClone(previous)
+      let current = cloned as unknown as Record<string, unknown>
       for (let i = 0; i < paths.length; i++) {
         const key = paths[i]
         if (i === paths.length - 1) {
-          if (!current[key]) current[key] = {}
-          current[key][lang] = val
+          const leaf = isRecord(current[key]) ? { ...current[key] } : {}
+          leaf[lang] = val
+          current[key] = leaf
         } else {
-          if (!current[key]) current[key] = {}
-          current[key] = { ...current[key] }
-          current = current[key]
+          const child = isRecord(current[key]) ? { ...current[key] } : {}
+          current[key] = child
+          current = child
         }
       }
       return cloned
@@ -96,22 +86,11 @@ export default function AdminDashboard() {
         const errorData = await res.json()
         setSaveError(errorData.error || "เกิดข้อผิดพลาดในการบันทึกข้อมูล")
       }
-    } catch (err) {
+    } catch {
       setSaveError("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์เพื่อบันทึกข้อมูลได้")
     } finally {
       setIsSaving(false)
     }
-  }
-
-  if (!isAuthenticated || !editableDict) {
-    return (
-      <div className="min-h-screen bg-[#0A1628] text-white flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-slate-400 font-semibold tracking-wider uppercase">กำลังตรวจสอบสิทธิ์การเข้าถึง...</p>
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -122,7 +101,7 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-3">
             <div className="relative size-9 bg-white rounded-full p-0.5 shrink-0">
               <Image
-                src="https://dutyxpert.com/wp-content/uploads/2025/02/cropped-dxs_main-logo.png"
+                src="/images/dutyxpert-logo.png"
                 alt="ดิวตี้ เอคซ์เพิร์ท"
                 width={36}
                 height={36}
@@ -452,16 +431,16 @@ function GridRow({
 }: {
   label: string
   path: string
-  editableDict: any
+  editableDict: TranslationsDict
   onChange: (path: string, lang: "th" | "en", val: string) => void
   textarea?: boolean
   rows?: number
 }) {
   // Extract values
   const paths = path.split(".")
-  let currentObj = editableDict
+  let currentObj: unknown = editableDict
   for (const k of paths) {
-    if (currentObj && typeof currentObj === "object") {
+    if (isRecord(currentObj)) {
       currentObj = currentObj[k]
     } else {
       currentObj = undefined
@@ -469,8 +448,8 @@ function GridRow({
     }
   }
 
-  const thValue = currentObj?.th || ""
-  const enValue = currentObj?.en || ""
+  const thValue = isRecord(currentObj) && typeof currentObj.th === "string" ? currentObj.th : ""
+  const enValue = isRecord(currentObj) && typeof currentObj.en === "string" ? currentObj.en : ""
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start border-b border-white/[0.03] pb-4">

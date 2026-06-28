@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Duty Xpert Security Website
 
-## Getting Started
+Production-oriented Next.js website for บริษัท รักษาความปลอดภัย ดิวตี้ เอคซ์เพิร์ท จำกัด.
 
-First, run the development server:
+## Stack
+
+- Next.js 16 / React 19
+- TypeScript strict
+- Tailwind CSS v4
+- File-backed admin translations/contact submissions
+- Vercel for temporary/dev public URL
+- cPanel/Nokhosting-compatible Node runtime via `server.js`
+
+## Scripts
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev        # local development
+npm run lint       # ESLint
+npm run typecheck  # TypeScript check
+npm run build      # production build using webpack fallback
+npm run check      # lint + typecheck + build
+npm start          # production Node server for cPanel/Passenger
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`npm run build` intentionally uses `next build --webpack` and `next.config.ts` limits worker usage. This keeps builds stable on shared hosting environments that restrict process/thread creation.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Required environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.example` and configure real values outside git.
 
-## Learn More
+```bash
+ADMIN_USERNAME=
+ADMIN_PASSWORD=
+SESSION_SECRET=
+DUTYXPERT_DATA_DIR=
+```
 
-To learn more about Next.js, take a look at the following resources:
+Notes:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `SESSION_SECRET` must be at least 32 characters.
+- `DUTYXPERT_DATA_DIR` should point outside the app directory on persistent servers, for example `/home/dutyxcnk/dutyxpert-data`.
+- On Vercel, use `/tmp/dutyxpert-data`; this is writable but ephemeral, so do not treat it as permanent storage.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Optional email notification
 
-## Deploy on Vercel
+Contact submissions are persisted to `contact-submissions.jsonl`. To also send email notifications, configure:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+SMTP_HOST=
+SMTP_PORT=465
+SMTP_USER=
+SMTP_PASSWORD=
+CONTACT_RECIPIENT=
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deployment
+
+### Vercel temporary URL
+
+The current temporary/dev public URL is:
+
+```text
+https://dutyxpert.vercel.app
+```
+
+Deploy:
+
+```bash
+vercel deploy . --prod -y
+```
+
+### Nokhosting/cPanel
+
+Node app configuration:
+
+- Application root: `/home/dutyxcnk/dutyxpert-app`
+- Startup file: `server.js`
+- Node version: 22.x
+- Production env should include `DUTYXPERT_DATA_DIR=/home/dutyxcnk/dutyxpert-data`
+
+After uploading source:
+
+```bash
+npm ci --include=dev
+npm run build
+npm prune --omit=dev
+mkdir -p tmp && touch tmp/restart.txt
+```
+
+## Production checklist
+
+- Run `npm run check` before deploy.
+- Confirm required env variables exist on the target platform.
+- Confirm `/login` does not expose any mock credentials.
+- Confirm `/admin` redirects without a valid session and loads after login.
+- Configure SMTP before expecting contact-form email notifications.
+- After domain migration, run/verify AutoSSL on hosting.

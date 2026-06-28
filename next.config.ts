@@ -1,17 +1,27 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
+  poweredByHeader: false,
+  compress: true,
+  images: { minimumCacheTTL: 2_592_000 },
+  experimental: {
+    cpus: 1,
+    memoryBasedWorkersCount: false,
+    webpackBuildWorker: false,
+    workerThreads: false,
+  },
+  async headers() {
+    return [
       {
-        protocol: 'https',
-        hostname: 'dutyxpert.com',
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        ],
       },
-      {
-        protocol: 'https',
-        hostname: 'chaiwatsst.wordpress.com',
-      }
-    ],
+    ]
   },
 };
 
