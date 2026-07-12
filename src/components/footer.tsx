@@ -35,7 +35,7 @@ export default function Footer() {
   ]
 
   return (
-    <footer className="bg-[#0A1628] border-t border-t-[#E8C547]/20 mt-auto">
+    <footer className="bg-[#0A1628] border-t border-white/[0.06] mt-auto">
       {/* Main Grid */}
       <div className="max-w-7xl mx-auto px-6 pt-16 pb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">

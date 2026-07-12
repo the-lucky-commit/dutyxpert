@@ -120,7 +120,7 @@ export default function PricingPage() {
             {costItems.map((item, idx) => {
               const ItemIcon = item.icon
               return (
-                <div key={idx} className="bg-white border border-slate-200/80 rounded-xl p-8 hover:shadow-md hover:border-accent/40 transition-all duration-300 flex flex-col gap-4">
+                <div key={idx} className="bg-white border border-slate-200/80 rounded-xl p-8 hover:shadow-md hover:border-slate-300 transition-all duration-300 flex flex-col gap-4">
                   <div className="bg-primary/5 text-primary p-3 rounded-lg w-fit">
                     <ItemIcon className="size-6" />
                   </div>

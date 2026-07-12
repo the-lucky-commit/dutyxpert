@@ -139,7 +139,7 @@ export default function AboutPage() {
                 icon: "/images/process-customization.png"
               }
             ].map((item, idx) => (
-              <div key={idx} className="bg-white border border-slate-200/80 rounded-xl p-6 relative hover:shadow-md hover:border-accent/40 transition-all duration-300 flex flex-col items-center text-center">
+              <div key={idx} className="bg-white border border-slate-200/80 rounded-xl p-6 relative hover:shadow-md hover:border-slate-300 transition-all duration-300 flex flex-col items-center text-center">
                 <span className="text-xs font-bold text-primary bg-primary/5 px-2.5 py-1 rounded-md mb-4">{item.step}</span>
                 <div className="relative size-12 mb-4">
                   <Image 
@@ -200,7 +200,7 @@ export default function AboutPage() {
               { letter: "T", title: t("about.val3Title"), desc: t("about.val3Desc") },
               { letter: "Y", title: t("about.val4Title"), desc: t("about.val4Desc") }
             ].map((v, index) => (
-              <div key={index} className="border border-slate-200/80 rounded-xl p-6 relative bg-slate-50 hover:shadow-md hover:border-accent/40 transition-all group">
+              <div key={index} className="border border-slate-200/80 rounded-xl p-6 relative bg-slate-50 hover:shadow-md hover:border-slate-300 transition-all group">
                 <span className="text-6xl font-extrabold text-primary/[0.04] group-hover:text-accent/10 transition-colors absolute top-4 right-4 leading-none select-none">
                   {v.letter}
                 </span>

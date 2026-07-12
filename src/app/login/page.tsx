@@ -54,7 +54,7 @@ export default function LoginPage() {
             <ArrowLeft className="size-4" />
             กลับหน้าแรก
           </Link>
-          <div className="text-[10px] text-accent font-extrabold uppercase tracking-widest bg-accent/10 px-3 py-1 rounded-md border border-accent/20">
+          <div className="text-[10px] text-accent font-extrabold uppercase tracking-widest bg-accent/10 px-3 py-1 rounded-md border border-white/10">
             Secure Portal
           </div>
         </div>
@@ -111,7 +111,7 @@ export default function LoginPage() {
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="กรอกชื่อผู้ใช้งาน"
                   autoComplete="username"
-                  className="w-full bg-[#070F1C]/75 border border-white/[0.08] focus:border-accent rounded-lg p-3 pl-10 text-xs text-white placeholder:text-slate-500 focus:outline-none transition-all"
+                  className="w-full bg-[#070F1C]/75 border border-white/[0.08] focus:border-white/20 rounded-lg p-3 pl-10 text-xs text-white placeholder:text-slate-500 focus:outline-none transition-all"
                   required
                 />
               </div>
@@ -131,7 +131,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   autoComplete="current-password"
-                  className="w-full bg-[#070F1C]/75 border border-white/[0.08] focus:border-accent rounded-lg p-3 pl-10 text-xs text-white placeholder:text-slate-500 focus:outline-none transition-all"
+                  className="w-full bg-[#070F1C]/75 border border-white/[0.08] focus:border-white/20 rounded-lg p-3 pl-10 text-xs text-white placeholder:text-slate-500 focus:outline-none transition-all"
                   required
                 />
               </div>

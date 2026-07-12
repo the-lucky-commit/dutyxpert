@@ -117,7 +117,6 @@ export default function Home() {
             <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mt-4 tracking-tight leading-tight">
               {t("home.servicesTitle")}
             </h2>
-            <div className="accent-line mx-auto mt-6" />
           </motion.div>
 
           <motion.div {...stagger} className="grid grid-cols-1 md:grid-cols-3 gap-7 lg:gap-8">
@@ -142,7 +141,7 @@ export default function Home() {
               },
             ].map((s, i) => (
               <motion.div key={i} {...childFade}>
-                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-8 md:p-9 lg:p-10 h-full min-h-[300px] flex flex-col hover:shadow-lg hover:-translate-y-1 hover:border-accent/40 transition-all duration-300">
+                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-8 md:p-9 lg:p-10 h-full min-h-[300px] flex flex-col hover:shadow-lg hover:-translate-y-1 hover:border-slate-300 transition-all duration-300">
                   <div className="bg-primary/5 w-14 h-14 rounded-xl flex items-center justify-center mb-6">
                     <s.icon className="size-7 text-primary" />
                   </div>
@@ -188,7 +187,6 @@ export default function Home() {
               <h2 className="text-3xl md:text-4xl font-extrabold text-white mt-3 tracking-tight">
                 {t("home.whyChooseUsTitle")}
               </h2>
-              <div className="accent-line mt-4" />
             </div>
 
             <p className="text-slate-300 leading-relaxed text-sm md:text-base font-normal">
@@ -225,7 +223,6 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mt-3 tracking-tight">
               {t("home.processTitle")}
             </h2>
-            <div className="accent-line mx-auto mt-5" />
           </motion.div>
 
           <motion.div {...stagger} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -238,7 +235,7 @@ export default function Home() {
               { num: "06", title: t("home.p6Title"), desc: t("home.p6Desc") },
             ].map((p, i) => (
               <motion.div key={i} {...childFade}>
-                <div className="bg-white border border-slate-200/80 rounded-xl p-7 h-full hover:shadow-md hover:border-accent/40 transition-all duration-300">
+                <div className="bg-white border border-slate-200/80 rounded-xl p-7 h-full hover:shadow-md hover:border-slate-300 transition-all duration-300">
                   <span className="text-sm font-extrabold text-primary bg-primary/5 px-3 py-1.5 rounded-md inline-block mb-4">{p.num}</span>
                   <h4 className="font-bold text-slate-900 text-lg mb-3 leading-snug">{p.title}</h4>
                   <p className="text-base text-slate-600 leading-relaxed font-normal">{p.desc}</p>
@@ -257,7 +254,6 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-extrabold text-white mt-3 tracking-tight">
               {t("home.galleryTitle")}
             </h2>
-            <div className="accent-line mx-auto mt-5" />
           </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -294,7 +290,7 @@ export default function Home() {
 
       {/* ━━━ 6. CTA ━━━ */}
       <section className="py-20 md:py-28 bg-secondary relative overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(232,197,71,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(232,197,71,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-accent/5 rounded-full blur-[150px] pointer-events-none" />
 
         <div className="max-w-3xl mx-auto px-6 text-center relative z-10">

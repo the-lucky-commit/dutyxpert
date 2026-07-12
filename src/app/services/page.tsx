@@ -97,7 +97,7 @@ export default function ServicesPage() {
             <Link
               key={item.id}
               href={`#${item.id}`}
-              className="text-xs font-bold text-slate-300 hover:text-accent uppercase tracking-wider transition-colors border-b-2 border-transparent hover:border-accent pb-1"
+              className="text-xs font-bold text-slate-300 hover:text-accent uppercase tracking-wider transition-colors pb-1"
             >
               {item.title}
             </Link>
@@ -270,7 +270,7 @@ export default function ServicesPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <div className="space-y-4">
-              <h3 className="font-bold text-slate-900 text-base border-l-4 border-accent pl-4 uppercase tracking-wider mb-6">{t("services.delCol1Title")}</h3>
+              <h3 className="font-bold text-slate-900 text-base uppercase tracking-wider mb-6">{t("services.delCol1Title")}</h3>
               {[
                 t("services.delCol1Item1"),
                 t("services.delCol1Item2"),
@@ -285,7 +285,7 @@ export default function ServicesPage() {
             </div>
 
             <div className="space-y-4">
-              <h3 className="font-bold text-slate-900 text-base border-l-4 border-accent pl-4 uppercase tracking-wider mb-6">{t("services.delCol2Title")}</h3>
+              <h3 className="font-bold text-slate-900 text-base uppercase tracking-wider mb-6">{t("services.delCol2Title")}</h3>
               {[
                 t("services.delCol2Item1"),
                 t("services.delCol2Item2"),
