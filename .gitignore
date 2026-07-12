@@ -20,6 +20,10 @@
 # production
 /build
 /data
+/tmp
+/docs
+/output
+stderr.log
 
 # misc
 .DS_Store

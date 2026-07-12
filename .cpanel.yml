@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - /bin/mkdir -p /home/dutyxcnk/dutyxpert-app/tmp
+    - /bin/touch /home/dutyxcnk/dutyxpert-app/tmp/restart.txt
