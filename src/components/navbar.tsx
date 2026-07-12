@@ -82,7 +82,7 @@ export default function Navbar() {
         >
           <div className="max-w-7xl mx-auto px-6 h-8 flex justify-between items-center text-xs text-[#94A3B8]">
             <a
-              href="tel:0863682323"
+              href="tel:0809387829"
               className="flex items-center gap-1.5 hover:text-[#E8C547] transition-colors"
             >
               <Phone className="size-3 text-[#E8C547]" />
@@ -306,7 +306,7 @@ export default function Navbar() {
           {/* Mobile contact info */}
           <div className="mt-auto pt-8 border-t border-white/[0.06]">
             <a
-              href="tel:0863682323"
+              href="tel:0809387829"
               className="flex items-center gap-2 text-sm text-[#94A3B8] hover:text-[#E8C547] transition-colors"
             >
               <Phone className="size-4 text-[#E8C547]" />

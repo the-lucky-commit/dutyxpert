@@ -84,7 +84,6 @@ export default function ServicesPage() {
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight">
             {t("services.heroTitle")}
           </h1>
-          <div className="w-16 h-1 bg-accent mt-4" />
           <p className="text-slate-350 mt-5 text-base md:text-lg max-w-3xl leading-relaxed font-normal">
             {t("services.heroDesc")}
           </p>
@@ -212,7 +211,6 @@ export default function ServicesPage() {
             <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mt-3 leading-tight">
               {t("services.trainTitle")}
             </h2>
-            <div className="w-16 h-1 bg-accent mx-auto mt-4" />
             <p className="text-slate-355 mt-5 text-base md:text-lg leading-relaxed">
               {t("services.trainDesc")}
             </p>
@@ -265,7 +263,6 @@ export default function ServicesPage() {
             <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight mt-3 leading-tight">
               {t("services.deliverTitle")}
             </h2>
-            <div className="w-16 h-1 bg-accent mx-auto mt-4" />
             <p className="text-slate-600 mt-5 text-base md:text-lg leading-relaxed">
               {t("services.deliverDesc")}
             </p>
@@ -313,7 +310,6 @@ export default function ServicesPage() {
             <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight mt-3">
               {t("services.faqTitle")}
             </h2>
-            <div className="w-16 h-1 bg-accent mx-auto mt-4" />
           </div>
 
           <div className="space-y-6">
@@ -363,7 +359,7 @@ export default function ServicesPage() {
                 <ArrowRight className="size-5 ml-1.5" />
               </Button>
             </Link>
-            <a href="tel:086-368-2323" className="w-full sm:w-auto">
+            <a href="tel:0809387829" className="w-full sm:w-auto">
               <Button variant="outline" size="lg" className="w-full sm:w-auto text-base text-white border-white/40 hover:bg-white/10 py-6 px-8 rounded-md font-semibold">
                 {t("services.ctaBtnCall")}
               </Button>

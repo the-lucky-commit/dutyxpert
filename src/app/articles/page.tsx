@@ -111,7 +111,6 @@ export default async function ArticlesPage() {
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight">
             {copy.title}
           </h1>
-          <div className="w-16 h-1 bg-accent mt-4" />
           <p className="text-slate-350 mt-5 text-base md:text-lg max-w-3xl leading-relaxed font-normal">
             {copy.description}
           </p>

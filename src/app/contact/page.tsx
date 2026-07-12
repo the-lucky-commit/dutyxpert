@@ -6,6 +6,11 @@ import { Phone, Mail, MapPin, Clock, Check, AlertCircle, Building2, Send } from 
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/context/language-context"
 
+const GOOGLE_MAPS_PLACE_URL =
+  "https://www.google.com/maps/place/%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%A9%E0%B8%B1%E0%B8%97+%E0%B8%A3%E0%B8%B1%E0%B8%81%E0%B8%A9%E0%B8%B2%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%9B%E0%B8%A5%E0%B8%AD%E0%B8%94%E0%B8%A0%E0%B8%B1%E0%B8%A2+%E0%B8%94%E0%B8%B4%E0%B8%A7%E0%B8%95%E0%B8%B5%E0%B9%89+%E0%B9%80%E0%B8%AD%E0%B8%84%E0%B8%8B%E0%B9%8C%E0%B9%80%E0%B8%9E%E0%B8%B4%E0%B8%A3%E0%B9%8C%E0%B8%97+%E0%B8%88%E0%B8%B3%E0%B8%81%E0%B8%B1%E0%B8%94/@13.6525916,100.6367999,17z/data=!3m1!4b1!4m6!3m5!1s0x311d5fd04a59b66b:0x27f4219baaa31951!8m2!3d13.6525916!4d100.6393748!16s%2Fg%2F11x2v60fg2?entry=ttu&g_ep=EgoyMDI2MDcwOC4wIKXMDSoASAFQAw%3D%3D"
+const GOOGLE_MAPS_EMBED_URL =
+  "https://www.google.com/maps?q=13.6525916,100.6393748&z=17&output=embed"
+
 export default function ContactPage() {
   const { t } = useLanguage()
 
@@ -84,7 +89,6 @@ export default function ContactPage() {
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
             {t("contact.heroTitle")}
           </h1>
-          <div className="w-16 h-1 bg-accent mt-4" />
           <p className="text-slate-300 mt-4 text-sm md:text-base max-w-2xl leading-relaxed font-normal">
             {t("contact.heroDesc")}
           </p>
@@ -101,7 +105,6 @@ export default function ContactPage() {
               <p className="text-2xl font-extrabold text-slate-900 tracking-tight font-semibold">
                 {t("contact.infoTitle")}
               </p>
-              <div className="w-10 h-1 bg-accent mt-2" />
             </div>
 
             <div className="flex flex-col gap-6 text-sm text-slate-600">
@@ -336,35 +339,53 @@ export default function ContactPage() {
             <p className="text-2xl font-extrabold text-white tracking-tight font-semibold">{t("contact.mapTitle")}</p>
           </div>
           
-          <div className="bg-primary/95 border border-white/10 rounded-2xl aspect-video max-h-[450px] w-full flex flex-col justify-between p-8 text-white relative overflow-hidden shadow-xl">
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:3rem_3rem]" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
-            
-            <div className="flex justify-between items-start relative z-10">
-              <div className="flex items-center gap-3">
-                <div className="bg-accent p-2 rounded-md">
-                  <MapPin className="size-6 text-primary" />
+          <div className="overflow-hidden rounded-2xl border border-white/10 bg-primary shadow-xl">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px]">
+              <div className="relative min-h-[360px] bg-slate-900 lg:min-h-[450px]">
+                <iframe
+                  title="Duty Xpert office location on Google Maps"
+                  src={GOOGLE_MAPS_EMBED_URL}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="absolute inset-0 h-full w-full border-0"
+                  allowFullScreen
+                />
+              </div>
+
+              <div className="relative flex flex-col justify-between gap-8 p-6 text-white md:p-8">
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:3rem_3rem]" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-md bg-accent p-2">
+                      <MapPin className="size-6 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-extrabold text-white">{t("contact.mapCardTitle")}</h4>
+                      <p className="mt-1 text-xs leading-5 text-slate-300">
+                        225 ถนนสุขุมวิท 105 แขวงบางนาใต้ เขตบางนา กรุงเทพมหานคร
+                      </p>
+                    </div>
+                  </div>
+
+                  <a
+                    href={GOOGLE_MAPS_PLACE_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-6 inline-flex w-full items-center justify-center rounded-md border border-white/40 bg-secondary px-3.5 py-3 text-xs font-bold uppercase tracking-wider text-accent transition-colors hover:bg-secondary/95"
+                  >
+                    {t("contact.mapBtnOpen")}
+                  </a>
                 </div>
-                <div>
-                  <h4 className="font-extrabold text-white text-sm">{t("contact.mapCardTitle")}</h4>
-                  <p className="text-[10px] text-slate-300">225 ถนนสุขุมวิท 105 แขวงบางนาใต้ เขตบางนา กรุงเทพมหานคร</p>
+
+                <div className="relative z-10 rounded-xl border border-white/10 bg-primary/80 p-5 backdrop-blur-xs">
+                  <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-accent">
+                    {t("contact.mapBtsLabel")}
+                  </span>
+                  <p className="text-xs font-normal leading-relaxed text-slate-200">
+                    {t("contact.mapBtsText")}
+                  </p>
                 </div>
               </div>
-              <a
-                href="https://www.google.com/maps/search/?api=1&query=225%20Sukhumvit%20105%20Bang%20Na%20Bangkok%2010260"
-                target="_blank"
-                rel="noreferrer"
-                className="bg-secondary hover:bg-secondary/95 border border-white/40 px-3.5 py-1.5 rounded-md text-xs font-bold text-accent uppercase tracking-wider transition-colors"
-              >
-                {t("contact.mapBtnOpen")}
-              </a>
-            </div>
-
-            <div className="relative z-10 bg-primary/80 backdrop-blur-xs border border-white/10 p-5 rounded-xl max-w-sm mt-auto">
-              <span className="text-[10px] font-bold text-accent uppercase tracking-wider block mb-1">{t("contact.mapBtsLabel")}</span>
-              <p className="text-xs text-slate-200 leading-relaxed font-normal">
-                {t("contact.mapBtsText")}
-              </p>
             </div>
           </div>
         </div>

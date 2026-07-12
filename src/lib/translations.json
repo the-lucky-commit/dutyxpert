@@ -8,7 +8,7 @@
     "articles": { "th": "บทความและข่าวสาร", "en": "Articles & News" },
     "pricing": { "th": "การเสนอราคา", "en": "Pricing" },
     "contact": { "th": "ติดต่อเรา", "en": "Contact Us" },
-    "phone": { "th": "086-368-2323", "en": "086-368-2323" },
+    "phone": { "th": "080-938-7829", "en": "080-938-7829" },
     "langTh": { "th": "TH", "en": "TH" },
     "langEn": { "th": "EN", "en": "EN" },
     "dropdownGuard": { "th": "บริการเจ้าหน้าที่รักษาความปลอดภัย", "en": "Security Guard Services" },
@@ -212,7 +212,7 @@
     "ctaTitle2": { "th": "ไม่แน่ใจว่าการจัดการระบบแบบใดเหมาะสมกับโครงการของคุณ?", "en": "Not sure which security plan fits your organization?" },
     "ctaDesc2": { "th": "เรายินดีส่งสารวัตรสายตรวจและที่ปรึกษาเข้าทำการสำรวจพื้นที่จริง ประเมินระดับภัยคุกคาม และเสนอแนวทางการจัดการรักษาความปลอดภัยที่เหมาะสมและเป็นธรรมแก่ท่านโดยไม่มีค่าใช้จ่าย", "en": "We are pleased to send patrol inspectors to conduct a physical survey, evaluate threat levels, and propose customized security protocols at no charge." },
     "ctaBtnFree": { "th": "ติดต่อปรึกษาและสำรวจพื้นที่ฟรี", "en": "Get Free On-Site Survey" },
-    "ctaBtnCall": { "th": "โทรสอบถาม: 086-368-2323", "en": "Call Us: 086-368-2323" }
+    "ctaBtnCall": { "th": "โทรสอบถาม: 080-938-7829", "en": "Call Us: 080-938-7829" }
   },
   "pricing": {
     "heroTag": { "th": "การเสนอราคาและโครงสร้างต้นทุน", "en": "PRICING & COST STRUCTURE" },
@@ -253,7 +253,7 @@
     "hqLabel": { "th": "สำนักงานใหญ่", "en": "Headquarters" },
     "hqAddress": { "th": "บริษัท รักษาความปลอดภัย ดิวตี้ เอคซ์เพิร์ท จำกัด\n225 ถนนสุขุมวิท 105 แขวงบางนาใต้ เขตบางนา กรุงเทพมหานคร 10260", "en": "Duty Xpert Security Co., Ltd.\n225 Sukhumvit 105 Rd, Bang Na Tai, Bang Na, Bangkok 10260" },
     "phoneLabel": { "th": "สายตรงบริการ", "en": "Direct Lines" },
-    "phoneVal": { "th": "โทรติดต่อ: 086-368-2323 (ฝ่ายปฏิบัติการและจัดซื้อ)\nฝ่ายสายตรวจส่วนกลาง: ตรวจสอบและควบคุมดูแลตลอด 24 ชม.", "en": "Tel: 086-368-2323 (Ops & Procurement)\nSupervisors Dispatch: 24/7 patrol response operations" },
+    "phoneVal": { "th": "โทรติดต่อ: 080-938-7829 (ฝ่ายปฏิบัติการและจัดซื้อ)\nฝ่ายสายตรวจส่วนกลาง: ตรวจสอบและควบคุมดูแลตลอด 24 ชม.", "en": "Tel: 080-938-7829 (Ops & Procurement)\nSupervisors Dispatch: 24/7 patrol response operations" },
     "emailLabel": { "th": "อีเมลติดต่อ", "en": "Email Contact" },
     "emailVal": { "th": "ขอเสนอราคา / ข้อมูลทั่วไป: info@dutyxpert.com", "en": "Quotes & Info: info@dutyxpert.com" },
     "hoursLabel": { "th": "เวลาทำการสำนักงาน", "en": "Office Hours" },

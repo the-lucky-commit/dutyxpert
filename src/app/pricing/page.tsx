@@ -52,7 +52,6 @@ export default function PricingPage() {
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
             {t("pricing.heroTitle")}
           </h1>
-          <div className="w-16 h-1 bg-accent mt-4" />
           <p className="text-slate-350 mt-4 text-sm md:text-base max-w-2xl leading-relaxed font-normal">
             {t("pricing.heroDesc")}
           </p>
@@ -112,7 +111,6 @@ export default function PricingPage() {
             <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight mt-3">
               {t("pricing.structureTitle")}
             </h2>
-            <div className="w-16 h-1 bg-accent mx-auto mt-4" />
             <p className="text-slate-600 mt-4 text-sm font-normal">
               {t("pricing.structureDesc")}
             </p>

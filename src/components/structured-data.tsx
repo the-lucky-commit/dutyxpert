@@ -8,7 +8,7 @@ export default function StructuredData() {
     "image": "https://dutyxpert.com/images/patrol-team.jpg",
     "@id": "https://dutyxpert.com/#organization",
     "url": "https://dutyxpert.com",
-    "telephone": "+66-86-368-2323",
+    "telephone": "+66-80-938-7829",
     "priceRange": "$$$",
     "address": {
       "@type": "PostalAddress",

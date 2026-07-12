@@ -12,7 +12,6 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
       <h4 className="text-sm font-bold text-[#E2E8F0] uppercase tracking-wider">
         {children}
       </h4>
-      <div className="mt-2 w-8 h-0.5 bg-gradient-to-r from-[#E8C547] to-transparent rounded-full" />
     </div>
   )
 }
@@ -115,7 +114,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="tel:0863682323"
+                  href="tel:0809387829"
                   className="flex items-center gap-3 hover:text-[#E8C547] transition-colors"
                 >
                   <Phone className="size-5 text-[#E8C547] shrink-0" />

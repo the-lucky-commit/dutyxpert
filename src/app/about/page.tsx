@@ -34,7 +34,6 @@ export default function AboutPage() {
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
             {t("about.heroTitle")}
           </h1>
-          <div className="w-16 h-1 bg-accent mt-4" />
           <p className="text-slate-350 mt-4 text-sm md:text-base max-w-2xl leading-relaxed font-normal">
             {t("about.heroDesc")}
           </p>
@@ -111,7 +110,6 @@ export default function AboutPage() {
             <p className="text-slate-600 mt-3 text-sm">
               {t("about.stepsDesc")}
             </p>
-            <div className="w-16 h-1 bg-accent mx-auto mt-4" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -193,7 +191,6 @@ export default function AboutPage() {
             <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
               {t("about.valuesTitle")}
             </h2>
-            <div className="w-16 h-1 bg-accent mx-auto mt-4" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
