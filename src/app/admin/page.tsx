@@ -7,15 +7,14 @@ import { useRouter } from "next/navigation"
 import {
   AlertCircle,
   CheckCircle,
-  ChevronLeft,
-  ChevronRight,
   ExternalLink,
   FilePenLine,
-  LayoutList,
   LogOut,
   Newspaper,
   PlusCircle,
+  Rows3,
   Save,
+  Send,
   Trash2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -75,6 +74,42 @@ function makeSlug(input: string) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 120)
+}
+
+function makeFallbackSlug() {
+  return `article-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${Date.now()
+    .toString(36)
+    .slice(-5)}`
+}
+
+function getPlainExcerpt(draft: ArticleDraft) {
+  return draft.excerpt.trim() || draft.content.trim().replace(/\s+/g, " ").slice(0, 180)
+}
+
+function buildArticlePayload(draft: ArticleDraft, published: boolean): ArticleDraft {
+  const title = draft.title.trim()
+  const excerpt = getPlainExcerpt(draft)
+  const slug = draft.slug.trim() || makeSlug(title) || makeFallbackSlug()
+
+  return {
+    ...draft,
+    slug,
+    title,
+    excerpt,
+    content: draft.content.trim(),
+    category: draft.category.trim() || "ข่าวสาร",
+    coverImageUrl: draft.coverImageUrl.trim(),
+    metaTitle: title,
+    metaDescription: excerpt,
+    published,
+  }
+}
+
+function splitPreviewParagraphs(content: string) {
+  return content
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
 }
 
 export default function AdminDashboard() {
@@ -149,44 +184,48 @@ export default function AdminDashboard() {
       <div className="grid min-h-[calc(100vh-4rem)] grid-cols-1 lg:grid-cols-[auto_1fr]">
         <aside
           className={`border-b border-slate-200 bg-white lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:border-b-0 lg:border-r ${
-            isSidebarCollapsed ? "lg:w-[76px]" : "lg:w-[260px]"
+            isSidebarCollapsed ? "lg:w-[68px]" : "lg:w-[220px]"
           }`}
         >
-          <div className="flex h-full flex-col gap-4 p-3">
+          <div className="flex h-full flex-col gap-3 p-2">
             <button
               type="button"
               onClick={() => setIsSidebarCollapsed((value) => !value)}
-              className="hidden h-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 lg:flex"
+              className="hidden h-10 w-full items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 lg:flex"
               aria-label={isSidebarCollapsed ? "ขยายเมนู" : "ย่อเมนู"}
             >
               {isSidebarCollapsed ? (
-                <ChevronRight className="size-4" />
+                <span className="text-lg leading-none">›</span>
               ) : (
-                <ChevronLeft className="size-4" />
+                <span className="text-lg leading-none">‹</span>
               )}
             </button>
 
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-amber-900">
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-slate-950">
-                  <Newspaper className="size-5" />
+            <div
+              className={`bg-amber-50 text-amber-900 ${
+                isSidebarCollapsed
+                  ? "mx-auto flex size-11 items-center justify-center rounded-xl"
+                  : "rounded-xl px-3 py-3"
+              }`}
+            >
+              <div className={`flex items-center ${isSidebarCollapsed ? "justify-center" : "gap-3"}`}>
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-400 text-slate-950">
+                  <Newspaper className="size-4" />
                 </div>
                 {!isSidebarCollapsed && (
                   <div className="min-w-0">
                     <p className="text-xs font-extrabold">บทความและข่าวสาร</p>
-                    <p className="mt-0.5 text-[10px] leading-relaxed text-amber-800">
-                      จัดการเนื้อหา SEO สำหรับลูกค้า
-                    </p>
+                    <p className="mt-0.5 text-[10px] leading-relaxed text-amber-800">อัปเดตข่าว/บทความ</p>
                   </div>
                 )}
               </div>
             </div>
 
             {!isSidebarCollapsed && (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs leading-relaxed text-slate-600">
-                <p className="font-bold text-slate-900">โฟกัสของหน้านี้</p>
+              <div className="px-3 py-2 text-xs leading-relaxed text-slate-500">
+                <p className="font-bold text-slate-800">สำหรับ Admin</p>
                 <p className="mt-1">
-                  เพิ่ม แก้ไข ลบ และเผยแพร่บทความเท่านั้น เพื่อลดความซับซ้อนให้ลูกค้าจัดการเองได้ง่าย
+                  เขียนข่าว ดูตัวอย่าง บันทึกแบบร่าง และเผยแพร่เมื่อพร้อม
                 </p>
               </div>
             )}
@@ -195,7 +234,7 @@ export default function AdminDashboard() {
 
         <main className="w-full overflow-x-hidden px-4 py-6 sm:px-6 lg:px-8">
           <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div className="border-b border-slate-200 pb-5">
               <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                 <div>
                   <p className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-[11px] font-extrabold text-amber-800">
@@ -205,7 +244,7 @@ export default function AdminDashboard() {
                     จัดการบทความและข่าวสาร
                   </h1>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-                    หน้า admin ถูกลดให้เหลือเฉพาะงานที่จำเป็นจริง: เขียนบทความ ใส่ข้อมูล SEO และเลือกเผยแพร่ขึ้นหน้าเว็บ
+                    เขียนเนื้อหา ตรวจตัวอย่าง บันทึกแบบร่าง แล้วค่อยเผยแพร่เมื่อเรียบร้อย
                   </p>
                 </div>
                 <Link
@@ -232,6 +271,7 @@ function ArticleManager() {
   const [draft, setDraft] = React.useState<ArticleDraft>(() => createEmptyArticleDraft())
   const [isLoading, setIsLoading] = React.useState(true)
   const [isSaving, setIsSaving] = React.useState(false)
+  const [viewMode, setViewMode] = React.useState<"edit" | "preview">("edit")
   const [message, setMessage] = React.useState("")
   const [error, setError] = React.useState("")
 
@@ -264,22 +304,24 @@ function ArticleManager() {
 
   const resetForm = () => {
     setDraft(createEmptyArticleDraft())
+    setViewMode("edit")
     setMessage("")
     setError("")
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  const handleSaveArticle = async () => {
+  const handleSaveArticle = async (published = draft.published) => {
     setIsSaving(true)
     setMessage("")
     setError("")
 
     try {
+      const payload = buildArticlePayload(draft, published)
       const method = draft.id ? "PUT" : "POST"
       const response = await fetch("/api/articles", {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(draft),
+        body: JSON.stringify(payload),
       })
       const result = (await response.json()) as Article | { error?: string }
       if (!response.ok) {
@@ -296,7 +338,8 @@ function ArticleManager() {
         return nextArticles.sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
       })
       setDraft(articleToDraft(savedArticle))
-      setMessage("บันทึกบทความสำเร็จแล้ว")
+      setViewMode("edit")
+      setMessage(published ? "เผยแพร่บทความสำเร็จแล้ว" : "บันทึกแบบร่างสำเร็จแล้ว")
       window.scrollTo({ top: 0, behavior: "smooth" })
     } catch {
       setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์เพื่อบันทึกบทความได้")
@@ -335,12 +378,12 @@ function ArticleManager() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[320px_1fr]">
-      <section className="self-start rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+    <div className="grid grid-cols-1 gap-8 xl:grid-cols-[300px_1fr]">
+      <section className="self-start bg-slate-50">
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="flex items-center gap-2 text-base font-extrabold text-slate-950">
-              <LayoutList className="size-4 text-amber-600" />
+              <Rows3 className="size-4 text-amber-600" />
               รายการบทความ
             </h2>
             <p className="mt-1 text-xs text-slate-500">{articles.length} รายการทั้งหมด</p>
@@ -358,11 +401,11 @@ function ArticleManager() {
 
         <div className="mt-4 flex flex-col gap-2">
           {isLoading ? (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
+            <div className="rounded-xl border border-dashed border-slate-200 bg-white p-5 text-sm text-slate-500">
               กำลังโหลดบทความ...
             </div>
           ) : articles.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm leading-6 text-slate-500">
+            <div className="rounded-xl border border-dashed border-slate-200 bg-white p-5 text-sm leading-6 text-slate-500">
               ยังไม่มีบทความ กด “เพิ่มใหม่” แล้วเริ่มเขียนบทความแรกได้เลย
             </div>
           ) : (
@@ -375,7 +418,7 @@ function ArticleManager() {
                   setMessage("")
                   setError("")
                 }}
-                className={`rounded-2xl border p-4 text-left transition ${
+                className={`rounded-xl border p-4 text-left transition ${
                   draft.id === article.id
                     ? "border-amber-300 bg-amber-50 shadow-sm"
                     : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
@@ -402,7 +445,7 @@ function ArticleManager() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <section className="bg-slate-50">
         <div className="flex flex-col gap-3 border-b border-slate-200 pb-5 md:flex-row md:items-start md:justify-between">
           <div>
             <h2 className="flex items-center gap-2 text-lg font-extrabold text-slate-950">
@@ -413,146 +456,198 @@ function ArticleManager() {
               กรอกหัวข้อ คำโปรย เนื้อหา และเปิดเผยแพร่เมื่อพร้อม ระบบจะใช้ข้อมูลนี้บนหน้าเว็บจริง
             </p>
           </div>
-          {selectedArticle?.published && (
-            <Link
-              href={`/articles/${selectedArticle.slug}`}
-              target="_blank"
-              className="inline-flex items-center text-xs font-extrabold text-amber-700 transition hover:text-amber-900"
-            >
-              ดูบทความจริง
-              <ExternalLink className="ml-1.5 size-3.5" />
-            </Link>
-          )}
-        </div>
-
-        <div className="mt-6 flex flex-col gap-5">
-          <AdminInput
-            label="หัวข้อบทความ"
-            value={draft.title}
-            onChange={(value) => {
-              updateDraft("title", value)
-              if (!draft.id && !draft.slug) updateDraft("slug", makeSlug(value))
-            }}
-            placeholder="เช่น 5 วิธีเลือกบริษัทรักษาความปลอดภัย"
-          />
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <AdminInput
-              label="Slug URL"
-              value={draft.slug}
-              onChange={(value) => updateDraft("slug", makeSlug(value))}
-              placeholder="security-company-selection"
-              helpText="ใช้ภาษาอังกฤษ ตัวเลข และขีดกลาง เพื่อ URL ที่อ่านง่าย"
-            />
-            <AdminInput
-              label="หมวดหมู่"
-              value={draft.category}
-              onChange={(value) => updateDraft("category", value)}
-              placeholder="ข่าวสาร / ความรู้ความปลอดภัย"
-            />
-          </div>
-
-          <AdminTextarea
-            label="คำโปรย / สรุปบทความ"
-            value={draft.excerpt}
-            onChange={(value) => updateDraft("excerpt", value)}
-            rows={3}
-            placeholder="สรุปสั้น ๆ สำหรับหน้า list และ meta description"
-          />
-
-          <AdminTextarea
-            label="เนื้อหาบทความ"
-            value={draft.content}
-            onChange={(value) => updateDraft("content", value)}
-            rows={14}
-            placeholder="เขียนเนื้อหาบทความ แยกย่อหน้าด้วยการเว้นบรรทัด"
-          />
-
-          <AdminInput
-            label="รูปปก (URL)"
-            value={draft.coverImageUrl}
-            onChange={(value) => updateDraft("coverImageUrl", value)}
-            placeholder="/images/patrol-team.jpg หรือ https://..."
-            helpText="ถ้ายังไม่มีรูป สามารถเว้นว่างไว้ก่อนได้"
-          />
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <AdminInput
-              label="SEO Title"
-              value={draft.metaTitle}
-              onChange={(value) => updateDraft("metaTitle", value)}
-              placeholder="ปล่อยว่างได้ ระบบจะใช้หัวข้อบทความ"
-            />
-            <AdminInput
-              label="วันที่เผยแพร่"
-              type="date"
-              value={draft.publishedAt}
-              onChange={(value) => updateDraft("publishedAt", value)}
-            />
-          </div>
-
-          <AdminTextarea
-            label="SEO Description"
-            value={draft.metaDescription}
-            onChange={(value) => updateDraft("metaDescription", value)}
-            rows={3}
-            placeholder="ปล่อยว่างได้ ระบบจะใช้คำโปรย"
-          />
-
-          <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
-            <input
-              type="checkbox"
-              checked={draft.published}
-              onChange={(event) => updateDraft("published", event.target.checked)}
-              className="mt-0.5 size-4 accent-[#E8C547]"
-            />
-            <span>
-              <span className="block font-extrabold text-slate-950">เผยแพร่บทความบนหน้าเว็บไซต์</span>
-              <span className="mt-0.5 block text-xs text-slate-500">
-                ถ้ายังไม่ติ๊ก บทความจะถูกเก็บเป็นร่างและไม่แสดงบนหน้า public
-              </span>
-            </span>
-          </label>
-
-          {(message || error) && (
-            <div
-              className={`flex items-start gap-2 rounded-2xl border p-4 text-sm font-bold ${
-                error
-                  ? "border-red-200 bg-red-50 text-red-700"
-                  : "border-green-200 bg-green-50 text-green-700"
-              }`}
-            >
-              {error ? <AlertCircle className="mt-0.5 size-4 shrink-0" /> : <CheckCircle className="mt-0.5 size-4 shrink-0" />}
-              {error || message}
-            </div>
-          )}
-
-          <div className="sticky bottom-0 -mx-5 mt-2 flex flex-col gap-3 border-t border-slate-200 bg-white/95 px-5 py-4 backdrop-blur sm:-mx-6 sm:flex-row sm:px-6">
+          <div className="flex flex-wrap gap-2">
             <Button
               type="button"
-              onClick={handleSaveArticle}
-              disabled={isSaving}
-              variant="gold"
-              className="h-12 font-extrabold"
+              onClick={() => setViewMode("edit")}
+              variant={viewMode === "edit" ? "gold" : "outline"}
+              className="h-10 px-4 text-xs font-extrabold"
             >
-              <Save className="mr-2 size-4" />
-              {isSaving ? "กำลังบันทึก..." : "บันทึกบทความ"}
+              เขียนบทความ
             </Button>
-            {draft.id && (
-              <Button
-                type="button"
-                onClick={handleDeleteArticle}
-                disabled={isSaving}
-                variant="destructive"
-                className="h-12 font-bold"
+            <Button
+              type="button"
+              onClick={() => setViewMode("preview")}
+              variant={viewMode === "preview" ? "gold" : "outline"}
+              className="h-10 px-4 text-xs font-extrabold"
+            >
+              ดูตัวอย่างก่อนเผยแพร่
+            </Button>
+            {selectedArticle?.published && (
+              <Link
+                href={`/articles/${selectedArticle.slug}`}
+                target="_blank"
+                className="inline-flex h-10 items-center text-xs font-extrabold text-amber-700 transition hover:text-amber-900"
               >
-                <Trash2 className="mr-2 size-4" />
-                ลบบทความ
-              </Button>
+                ดูบทความจริง
+                <ExternalLink className="ml-1.5 size-3.5" />
+              </Link>
             )}
           </div>
         </div>
+
+        {viewMode === "preview" ? (
+          <ArticlePreview draft={draft} />
+        ) : (
+          <div className="mt-6 flex flex-col gap-5">
+            <AdminInput
+              label="หัวข้อบทความ"
+              value={draft.title}
+              onChange={(value) => {
+                updateDraft("title", value)
+                if (!draft.id && !draft.slug) updateDraft("slug", makeSlug(value))
+              }}
+              placeholder="เช่น บริษัทควรเลือก รปภ. อย่างไรให้เหมาะกับหน้างาน"
+            />
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <AdminInput
+                label="หมวดหมู่"
+                value={draft.category}
+                onChange={(value) => updateDraft("category", value)}
+                placeholder="ข่าวสาร / ความรู้ความปลอดภัย"
+              />
+              <AdminInput
+                label="วันที่เผยแพร่"
+                type="date"
+                value={draft.publishedAt}
+                onChange={(value) => updateDraft("publishedAt", value)}
+              />
+            </div>
+
+            <AdminTextarea
+              label="คำโปรย / สรุปบทความ"
+              value={draft.excerpt}
+              onChange={(value) => updateDraft("excerpt", value)}
+              rows={3}
+              placeholder="เขียนสรุปสั้น ๆ ให้ลูกค้าเข้าใจว่าบทความนี้เกี่ยวกับอะไร"
+            />
+
+            <AdminTextarea
+              label="เนื้อหาบทความ"
+              value={draft.content}
+              onChange={(value) => updateDraft("content", value)}
+              rows={16}
+              placeholder="เขียนเนื้อหาบทความ แยกย่อหน้าด้วยการเว้นบรรทัด"
+            />
+
+            <AdminInput
+              label="รูปปก (URL)"
+              value={draft.coverImageUrl}
+              onChange={(value) => updateDraft("coverImageUrl", value)}
+              placeholder="/images/patrol-team.jpg หรือ https://..."
+              helpText="ถ้ายังไม่มีรูป สามารถเว้นว่างไว้ก่อนได้"
+            />
+          </div>
+        )}
+
+        {(message || error) && (
+          <div
+            className={`mt-5 flex items-start gap-2 rounded-xl p-4 text-sm font-bold ${
+              error
+                ? "bg-red-50 text-red-700"
+                : "bg-green-50 text-green-700"
+            }`}
+          >
+            {error ? <AlertCircle className="mt-0.5 size-4 shrink-0" /> : <CheckCircle className="mt-0.5 size-4 shrink-0" />}
+            {error || message}
+          </div>
+        )}
+
+        <div className="sticky bottom-0 mt-6 flex flex-col gap-3 border-t border-slate-200 bg-slate-50/95 py-4 backdrop-blur sm:flex-row">
+          <Button
+            type="button"
+            onClick={() => handleSaveArticle(false)}
+            disabled={isSaving}
+            variant="outline"
+            className="h-12 bg-white font-extrabold"
+          >
+            <Save className="mr-2 size-4" />
+            {isSaving ? "กำลังบันทึก..." : "บันทึกแบบร่าง"}
+          </Button>
+          <Button
+            type="button"
+            onClick={() => setViewMode("preview")}
+            disabled={isSaving}
+            variant="outline"
+            className="h-12 bg-white font-extrabold"
+          >
+            ดูตัวอย่าง
+          </Button>
+          <Button
+            type="button"
+            onClick={() => handleSaveArticle(true)}
+            disabled={isSaving}
+            variant="gold"
+            className="h-12 font-extrabold"
+          >
+            <Send className="mr-2 size-4" />
+            เผยแพร่บทความ
+          </Button>
+          {draft.id && (
+            <Button
+              type="button"
+              onClick={handleDeleteArticle}
+              disabled={isSaving}
+              variant="destructive"
+              className="h-12 font-bold sm:ml-auto"
+            >
+              <Trash2 className="mr-2 size-4" />
+              ลบบทความ
+            </Button>
+          )}
+        </div>
       </section>
+    </div>
+  )
+}
+
+function ArticlePreview({ draft }: { draft: ArticleDraft }) {
+  const title = draft.title.trim() || "หัวข้อบทความจะแสดงที่นี่"
+  const excerpt = getPlainExcerpt(draft) || "คำโปรยบทความจะแสดงตรงนี้ เพื่อให้ตรวจทานก่อนเผยแพร่"
+  const category = draft.category.trim() || "ข่าวสาร"
+  const paragraphs = splitPreviewParagraphs(draft.content)
+
+  return (
+    <div className="mt-6 bg-white">
+      <div className="mb-5 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <strong>Preview:</strong> หน้านี้เป็นตัวอย่างสำหรับตรวจข้อความและรูปแบบก่อนกดเผยแพร่ ยังไม่แสดงบนหน้า public จนกว่าจะกด “เผยแพร่บทความ”
+      </div>
+
+      <article className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+        <div className="bg-slate-950 px-6 py-10 text-white sm:px-8">
+          <div className="mb-4 inline-flex rounded-full bg-amber-400 px-3 py-1 text-xs font-extrabold text-slate-950">
+            {category}
+          </div>
+          <h3 className="text-2xl font-extrabold leading-tight sm:text-4xl">{title}</h3>
+          <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-300 sm:text-base">{excerpt}</p>
+        </div>
+
+        {draft.coverImageUrl.trim() && (
+          <div className="border-b border-slate-200 bg-slate-100 px-6 py-6 sm:px-8">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={draft.coverImageUrl.trim()}
+              alt={title}
+              className="max-h-[360px] w-full rounded-xl object-cover"
+            />
+          </div>
+        )}
+
+        <div className="px-6 py-8 sm:px-8">
+          {paragraphs.length === 0 ? (
+            <p className="text-sm leading-7 text-slate-500">
+              เนื้อหาบทความจะแสดงตรงนี้หลังจากเริ่มเขียนในช่องเนื้อหา
+            </p>
+          ) : (
+            paragraphs.map((paragraph, index) => (
+              <p key={index} className="mb-5 text-base leading-8 text-slate-700">
+                {paragraph}
+              </p>
+            ))
+          )}
+        </div>
+      </article>
     </div>
   )
 }

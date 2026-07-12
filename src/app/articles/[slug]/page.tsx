@@ -3,6 +3,12 @@ import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowLeft, CalendarDays, Newspaper } from "lucide-react"
+import {
+  buildArticleSeoDescription,
+  buildArticleSeoTitle,
+  getArticleCanonicalUrl,
+  getArticleOgImage,
+} from "@/lib/article-seo"
 import { readPublishedArticleBySlug } from "@/lib/data-store"
 
 export const dynamic = "force-dynamic"
@@ -61,30 +67,29 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
     }
   }
 
-  const title = article.metaTitle || article.title
-  const description = article.metaDescription || article.excerpt
-  const url = `/articles/${article.slug}`
+  const title = buildArticleSeoTitle(article)
+  const description = buildArticleSeoDescription(article)
+  const canonicalUrl = getArticleCanonicalUrl(article)
+  const ogImage = getArticleOgImage(article)
 
   return {
     title,
     description,
-    alternates: { canonical: url },
+    alternates: { canonical: canonicalUrl },
     openGraph: {
       title,
       description,
-      url: `https://dutyxpert.com${url}`,
+      url: canonicalUrl,
       type: "article",
       publishedTime: article.publishedAt,
       modifiedTime: article.updatedAt,
-      images: article.coverImageUrl
-        ? [{ url: article.coverImageUrl, alt: article.title }]
-        : undefined,
+      images: [{ url: ogImage, alt: article.title }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: article.coverImageUrl ? [article.coverImageUrl] : undefined,
+      images: [ogImage],
     },
   }
 }
