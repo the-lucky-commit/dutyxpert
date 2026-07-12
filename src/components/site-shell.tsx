@@ -17,14 +17,20 @@ export default function SiteShell({ children, initialTranslations }: SiteShellPr
   const pathname = usePathname()
   const isAdminRoute = pathname?.startsWith("/admin")
 
+  if (isAdminRoute) {
+    return (
+      <LanguageProvider initialTranslations={initialTranslations}>
+        <main className="min-h-screen flex-grow bg-slate-50">{children}</main>
+      </LanguageProvider>
+    )
+  }
+
   return (
     <LanguageProvider initialTranslations={initialTranslations}>
       <LenisProvider>
-        {!isAdminRoute && <Navbar />}
-        <main className={isAdminRoute ? "flex-grow" : "flex-grow pt-20 lg:pt-[104px]"}>
-          {children}
-        </main>
-        {!isAdminRoute && <Footer />}
+        <Navbar />
+        <main className="flex-grow pt-20 lg:pt-[104px]">{children}</main>
+        <Footer />
       </LenisProvider>
     </LanguageProvider>
   )
