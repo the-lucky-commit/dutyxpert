@@ -7,6 +7,7 @@ export type TranslationsDict = typeof defaultTranslations
 
 export type Article = {
   id: string
+  translationGroupId: string
   language: Language
   slug: string
   title: string
@@ -154,6 +155,7 @@ export function sanitizeArticle(value: unknown): Article {
 
   const now = new Date().toISOString()
   const id = sanitizeString(value.id ?? "", 80, "id")
+  const translationGroupId = sanitizeString(value.translationGroupId ?? id, 80, "translation group id")
   const language = normalizeLanguage(value.language)
   const slug = sanitizeString(value.slug, 120, "slug").toLowerCase()
   const title = sanitizeString(value.title, 160, "title")
@@ -171,6 +173,7 @@ export function sanitizeArticle(value: unknown): Article {
 
   return {
     id,
+    translationGroupId,
     language,
     slug,
     title,

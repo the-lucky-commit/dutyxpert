@@ -9,7 +9,7 @@ import {
   CheckCircle,
   ExternalLink,
   FilePenLine,
-  Globe2,
+  ImagePlus,
   LogOut,
   Newspaper,
   PlusCircle,
@@ -20,55 +20,52 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Article } from "@/lib/data-store"
-import { type Language, getLanguageLabel } from "@/lib/language"
+import type { Language } from "@/lib/language"
 
-type ArticleDraft = Pick<
-  Article,
-  | "id"
-  | "language"
-  | "slug"
-  | "title"
-  | "excerpt"
-  | "content"
-  | "category"
-  | "coverImageUrl"
-  | "metaTitle"
-  | "metaDescription"
-  | "published"
-  | "publishedAt"
->
+type ArticleCategory = "ข่าวสาร" | "บทความ"
 
-function createEmptyArticleDraft(): ArticleDraft {
+type LocalizedDraft = {
+  id: string
+  slug: string
+  title: string
+  summary: string
+  content: string
+}
+
+type ArticleDraft = {
+  translationGroupId: string
+  category: ArticleCategory
+  coverImageUrl: string
+  publishedAt: string
+  published: boolean
+  th: LocalizedDraft
+  en: LocalizedDraft
+}
+
+const CATEGORY_OPTIONS: Array<{ label: ArticleCategory; description: string }> = [
+  { label: "ข่าวสาร", description: "ข่าวอัปเดตจากบริษัท" },
+  { label: "บทความ", description: "ความรู้หรือคำแนะนำ" },
+]
+
+function createEmptyLocalizedDraft(): LocalizedDraft {
   return {
     id: "",
-    language: "th",
     slug: "",
     title: "",
-    excerpt: "",
+    summary: "",
     content: "",
-    category: "ข่าวสาร",
-    coverImageUrl: "",
-    metaTitle: "",
-    metaDescription: "",
-    published: false,
-    publishedAt: new Date().toISOString().slice(0, 10),
   }
 }
 
-function articleToDraft(article: Article): ArticleDraft {
+function createEmptyArticleDraft(): ArticleDraft {
   return {
-    id: article.id,
-    language: article.language,
-    slug: article.slug,
-    title: article.title,
-    excerpt: article.excerpt,
-    content: article.content,
-    category: article.category,
-    coverImageUrl: article.coverImageUrl,
-    metaTitle: article.metaTitle,
-    metaDescription: article.metaDescription,
-    published: article.published,
-    publishedAt: article.publishedAt.slice(0, 10),
+    translationGroupId: "",
+    category: "ข่าวสาร",
+    coverImageUrl: "",
+    published: false,
+    publishedAt: new Date().toISOString().slice(0, 10),
+    th: createEmptyLocalizedDraft(),
+    en: createEmptyLocalizedDraft(),
   }
 }
 
@@ -81,33 +78,23 @@ function makeSlug(input: string) {
     .slice(0, 120)
 }
 
-function makeFallbackSlug() {
-  return `article-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${Date.now()
+function makeFallbackSlug(language: Language) {
+  return `${language}-article-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${Date.now()
     .toString(36)
     .slice(-5)}`
 }
 
-function getPlainExcerpt(draft: ArticleDraft) {
-  return draft.excerpt.trim() || draft.content.trim().replace(/\s+/g, " ").slice(0, 180)
+function isLocalizedDraftFilled(draft: LocalizedDraft) {
+  return Boolean(draft.title.trim() || draft.summary.trim() || draft.content.trim())
 }
 
-function buildArticlePayload(draft: ArticleDraft, published: boolean): ArticleDraft {
-  const title = draft.title.trim()
-  const excerpt = getPlainExcerpt(draft)
-  const slug = draft.slug.trim() || makeSlug(title) || makeFallbackSlug()
+function isLocalizedDraftComplete(draft: LocalizedDraft) {
+  return Boolean(draft.title.trim() && draft.summary.trim() && draft.content.trim())
+}
 
-  return {
-    ...draft,
-    slug,
-    title,
-    excerpt,
-    content: draft.content.trim(),
-    category: draft.category.trim() || "ข่าวสาร",
-    coverImageUrl: draft.coverImageUrl.trim(),
-    metaTitle: title,
-    metaDescription: excerpt,
-    published,
-  }
+function getCategoryForLanguage(category: ArticleCategory, language: Language) {
+  if (language === "th") return category
+  return category === "ข่าวสาร" ? "News" : "Article"
 }
 
 function splitPreviewParagraphs(content: string) {
@@ -115,6 +102,114 @@ function splitPreviewParagraphs(content: string) {
     .split(/\n{2,}/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean)
+}
+
+function getGroupId(article: Article) {
+  return article.translationGroupId || article.id
+}
+
+function groupArticles(articles: Article[]) {
+  const groups = new Map<string, { id: string; th?: Article; en?: Article }>()
+
+  for (const article of articles) {
+    const id = getGroupId(article)
+    const existing = groups.get(id) ?? { id }
+    if (article.language === "en") existing.en = article
+    else existing.th = article
+    groups.set(id, existing)
+  }
+
+  return Array.from(groups.values()).sort((a, b) => {
+    const aDate = Date.parse((a.th ?? a.en)?.updatedAt ?? "")
+    const bDate = Date.parse((b.th ?? b.en)?.updatedAt ?? "")
+    return bDate - aDate
+  })
+}
+
+function groupToDraft(group: { id: string; th?: Article; en?: Article }): ArticleDraft {
+  const mainArticle = group.th ?? group.en
+  return {
+    translationGroupId: group.id,
+    category: (group.th?.category === "บทความ" || group.en?.category === "Article" ? "บทความ" : "ข่าวสาร"),
+    coverImageUrl: mainArticle?.coverImageUrl ?? "",
+    published: Boolean(group.th?.published || group.en?.published),
+    publishedAt: (mainArticle?.publishedAt ?? new Date().toISOString()).slice(0, 10),
+    th: {
+      id: group.th?.id ?? "",
+      slug: group.th?.slug ?? "",
+      title: group.th?.title ?? "",
+      summary: group.th?.excerpt ?? "",
+      content: group.th?.content ?? "",
+    },
+    en: {
+      id: group.en?.id ?? "",
+      slug: group.en?.slug ?? "",
+      title: group.en?.title ?? "",
+      summary: group.en?.excerpt ?? "",
+      content: group.en?.content ?? "",
+    },
+  }
+}
+
+function buildArticlePayload({
+  draft,
+  language,
+  published,
+}: {
+  draft: ArticleDraft
+  language: Language
+  published: boolean
+}) {
+  const localized = draft[language]
+  const title = localized.title.trim()
+  const summary = localized.summary.trim()
+  const slug = localized.slug.trim() || makeSlug(title) || makeFallbackSlug(language)
+
+  return {
+    id: localized.id,
+    translationGroupId: draft.translationGroupId,
+    language,
+    slug,
+    title,
+    excerpt: summary,
+    content: localized.content.trim(),
+    category: getCategoryForLanguage(draft.category, language),
+    coverImageUrl: draft.coverImageUrl.trim(),
+    metaTitle: title,
+    metaDescription: summary,
+    published,
+    publishedAt: draft.publishedAt,
+  }
+}
+
+async function resizeImage(file: File) {
+  const imageBitmap = await createImageBitmap(file)
+  const maxWidth = 1600
+  const maxHeight = 1000
+  const ratio = Math.min(1, maxWidth / imageBitmap.width, maxHeight / imageBitmap.height)
+  const width = Math.max(1, Math.round(imageBitmap.width * ratio))
+  const height = Math.max(1, Math.round(imageBitmap.height * ratio))
+  const canvas = document.createElement("canvas")
+  const context = canvas.getContext("2d")
+
+  if (!context) throw new Error("ไม่สามารถย่อรูปได้")
+
+  canvas.width = width
+  canvas.height = height
+  context.drawImage(imageBitmap, 0, 0, width, height)
+
+  const blob = await new Promise<Blob | null>((resolve) => {
+    canvas.toBlob(resolve, "image/webp", 0.84)
+  })
+
+  if (!blob) throw new Error("ไม่สามารถแปลงรูปได้")
+
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result))
+    reader.onerror = () => reject(new Error("ไม่สามารถอ่านรูปได้"))
+    reader.readAsDataURL(blob)
+  })
 }
 
 export default function AdminDashboard() {
@@ -220,20 +315,13 @@ export default function AdminDashboard() {
                 {!isSidebarCollapsed && (
                   <div className="min-w-0">
                     <p className="text-xs font-extrabold">บทความและข่าวสาร</p>
-                    <p className="mt-0.5 text-[10px] leading-relaxed text-amber-800">อัปเดตข่าว/บทความ</p>
+                    <p className="mt-0.5 text-[10px] leading-relaxed text-amber-800">
+                      อัปเดตข่าว/บทความ
+                    </p>
                   </div>
                 )}
               </div>
             </div>
-
-            {!isSidebarCollapsed && (
-              <div className="px-3 py-2 text-xs leading-relaxed text-slate-500">
-                <p className="font-bold text-slate-800">สำหรับ Admin</p>
-                <p className="mt-1">
-                  เขียนข่าว ดูตัวอย่าง บันทึกแบบร่าง และเผยแพร่เมื่อพร้อม
-                </p>
-              </div>
-            )}
           </div>
         </aside>
 
@@ -249,7 +337,7 @@ export default function AdminDashboard() {
                     จัดการบทความและข่าวสาร
                   </h1>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-                    เขียนเนื้อหา เลือกภาษา ตรวจตัวอย่าง บันทึกแบบร่าง แล้วค่อยเผยแพร่เมื่อเรียบร้อย
+                    กรอกภาษาไทยและอังกฤษในหน้าเดียว ตรวจตัวอย่าง แล้วค่อยเผยแพร่
                   </p>
                 </div>
                 <Link
@@ -276,11 +364,15 @@ function ArticleManager() {
   const [draft, setDraft] = React.useState<ArticleDraft>(() => createEmptyArticleDraft())
   const [isLoading, setIsLoading] = React.useState(true)
   const [isSaving, setIsSaving] = React.useState(false)
+  const [isUploadingImage, setIsUploadingImage] = React.useState(false)
   const [viewMode, setViewMode] = React.useState<"edit" | "preview">("edit")
   const [message, setMessage] = React.useState("")
   const [error, setError] = React.useState("")
 
-  const selectedArticle = articles.find((article) => article.id === draft.id)
+  const articleGroups = React.useMemo(() => groupArticles(articles), [articles])
+  const selectedGroup = draft.translationGroupId
+    ? articleGroups.find((group) => group.id === draft.translationGroupId)
+    : undefined
 
   const loadArticles = React.useCallback(async () => {
     setIsLoading(true)
@@ -290,7 +382,7 @@ function ArticleManager() {
       if (!response.ok) throw new Error("Unable to load articles")
       setArticles((await response.json()) as Article[])
     } catch {
-      setError("ไม่สามารถโหลดรายการบทความได้")
+      setError("โหลดรายการไม่สำเร็จ")
     } finally {
       setIsLoading(false)
     }
@@ -307,6 +399,23 @@ function ArticleManager() {
     setDraft((previous) => ({ ...previous, [key]: value }))
   }
 
+  const updateLocalizedDraft = (
+    language: Language,
+    key: keyof LocalizedDraft,
+    value: string
+  ) => {
+    setDraft((previous) => ({
+      ...previous,
+      [language]: {
+        ...previous[language],
+        [key]: value,
+        ...(key === "title" && !previous[language].id && !previous[language].slug
+          ? { slug: makeSlug(value) }
+          : {}),
+      },
+    }))
+  }
+
   const resetForm = () => {
     setDraft(createEmptyArticleDraft())
     setViewMode("edit")
@@ -315,70 +424,158 @@ function ArticleManager() {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
+  const upsertSavedArticle = (savedArticle: Article) => {
+    setArticles((previous) => {
+      const exists = previous.some((article) => article.id === savedArticle.id)
+      const nextArticles = exists
+        ? previous.map((article) => (article.id === savedArticle.id ? savedArticle : article))
+        : [savedArticle, ...previous]
+      return nextArticles.sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
+    })
+  }
+
+  const saveOneArticle = async (language: Language, published: boolean, groupId: string) => {
+    const localized = draft[language]
+    if (!isLocalizedDraftFilled(localized)) return undefined
+
+    if (!isLocalizedDraftComplete(localized)) {
+      throw new Error(language === "th" ? "กรอกภาษาไทยให้ครบก่อนบันทึก" : "กรอกภาษาอังกฤษให้ครบก่อนบันทึก")
+    }
+
+    const payload = buildArticlePayload({
+      draft: { ...draft, translationGroupId: groupId },
+      language,
+      published,
+    })
+    const response = await fetch("/api/articles", {
+      method: localized.id ? "PUT" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+    const result = (await response.json()) as Article | { error?: string }
+
+    if (!response.ok) {
+      throw new Error("error" in result && result.error ? result.error : "บันทึกไม่สำเร็จ")
+    }
+
+    return result as Article
+  }
+
   const handleSaveArticle = async (published = draft.published) => {
     setIsSaving(true)
     setMessage("")
     setError("")
 
     try {
-      const payload = buildArticlePayload(draft, published)
-      const method = draft.id ? "PUT" : "POST"
-      const response = await fetch("/api/articles", {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-      const result = (await response.json()) as Article | { error?: string }
-      if (!response.ok) {
-        setError("error" in result && result.error ? result.error : "ไม่สามารถบันทึกบทความได้")
+      const hasThai = isLocalizedDraftFilled(draft.th)
+      const hasEnglish = isLocalizedDraftFilled(draft.en)
+
+      if (!hasThai && !hasEnglish) {
+        setError("กรอกข้อมูลอย่างน้อย 1 ภาษา ก่อนบันทึก")
         return
       }
 
-      const savedArticle = result as Article
-      setArticles((previous) => {
-        const exists = previous.some((article) => article.id === savedArticle.id)
-        const nextArticles = exists
-          ? previous.map((article) => (article.id === savedArticle.id ? savedArticle : article))
-          : [savedArticle, ...previous]
-        return nextArticles.sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
-      })
-      setDraft(articleToDraft(savedArticle))
+      if (published && (!isLocalizedDraftComplete(draft.th) || !isLocalizedDraftComplete(draft.en))) {
+        setError("ถ้าจะเผยแพร่ กรุณากรอกทั้งภาษาไทยและภาษาอังกฤษให้ครบ")
+        return
+      }
+
+      const groupId = draft.translationGroupId || crypto.randomUUID()
+      const savedThai = await saveOneArticle("th", published, groupId)
+      const savedEnglish = await saveOneArticle("en", published, groupId)
+
+      if (savedThai) upsertSavedArticle(savedThai)
+      if (savedEnglish) upsertSavedArticle(savedEnglish)
+
+      setDraft((previous) => ({
+        ...previous,
+        translationGroupId: groupId,
+        published,
+        th: savedThai
+          ? {
+              id: savedThai.id,
+              slug: savedThai.slug,
+              title: savedThai.title,
+              summary: savedThai.excerpt,
+              content: savedThai.content,
+            }
+          : previous.th,
+        en: savedEnglish
+          ? {
+              id: savedEnglish.id,
+              slug: savedEnglish.slug,
+              title: savedEnglish.title,
+              summary: savedEnglish.excerpt,
+              content: savedEnglish.content,
+            }
+          : previous.en,
+      }))
       setViewMode("edit")
-      setMessage(published ? "เผยแพร่บทความสำเร็จแล้ว" : "บันทึกแบบร่างสำเร็จแล้ว")
+      setMessage(published ? "เผยแพร่เรียบร้อยแล้ว" : "บันทึกแบบร่างแล้ว")
       window.scrollTo({ top: 0, behavior: "smooth" })
-    } catch {
-      setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์เพื่อบันทึกบทความได้")
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "บันทึกไม่สำเร็จ")
     } finally {
       setIsSaving(false)
     }
   }
 
   const handleDeleteArticle = async () => {
-    if (!draft.id || !confirm("ต้องการลบบทความนี้ใช่ไหม? การลบไม่สามารถย้อนกลับได้")) {
-      return
-    }
+    const ids = [draft.th.id, draft.en.id].filter(Boolean)
+    if (ids.length === 0) return
+    if (!confirm("ต้องการลบบทความชุดนี้ใช่ไหม? การลบไม่สามารถย้อนกลับได้")) return
 
     setIsSaving(true)
     setMessage("")
     setError("")
     try {
-      const response = await fetch("/api/articles", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: draft.id }),
-      })
-      if (!response.ok) {
-        const result = (await response.json()) as { error?: string }
-        setError(result.error || "ไม่สามารถลบบทความได้")
-        return
+      for (const id of ids) {
+        const response = await fetch("/api/articles", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        })
+        if (!response.ok) throw new Error("ลบบทความไม่สำเร็จ")
       }
-      setArticles((previous) => previous.filter((article) => article.id !== draft.id))
+      setArticles((previous) => previous.filter((article) => !ids.includes(article.id)))
       resetForm()
-      setMessage("ลบบทความสำเร็จแล้ว")
-    } catch {
-      setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์เพื่อลบบทความได้")
+      setMessage("ลบบทความแล้ว")
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "ลบบทความไม่สำเร็จ")
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  const handleImageUpload = async (file: File | undefined) => {
+    if (!file) return
+    setIsUploadingImage(true)
+    setMessage("")
+    setError("")
+
+    try {
+      if (!file.type.startsWith("image/")) {
+        throw new Error("กรุณาเลือกไฟล์รูปภาพ")
+      }
+
+      const resizedImage = await resizeImage(file)
+      const response = await fetch("/api/uploads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: resizedImage }),
+      })
+      const result = (await response.json()) as { url?: string; error?: string }
+
+      if (!response.ok || !result.url) {
+        throw new Error(result.error || "อัปโหลดรูปไม่สำเร็จ")
+      }
+
+      updateDraft("coverImageUrl", result.url)
+      setMessage("อัปโหลดรูปแล้ว")
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "อัปโหลดรูปไม่สำเร็จ")
+    } finally {
+      setIsUploadingImage(false)
     }
   }
 
@@ -389,9 +586,9 @@ function ArticleManager() {
           <div>
             <h2 className="flex items-center gap-2 text-base font-extrabold text-slate-950">
               <Rows3 className="size-4 text-amber-600" />
-              รายการบทความ
+              รายการ
             </h2>
-            <p className="mt-1 text-xs text-slate-500">{articles.length} รายการทั้งหมด</p>
+            <p className="mt-1 text-xs text-slate-500">{articleGroups.length} รายการทั้งหมด</p>
           </div>
           <Button
             type="button"
@@ -407,50 +604,51 @@ function ArticleManager() {
         <div className="mt-4 flex flex-col gap-2">
           {isLoading ? (
             <div className="rounded-xl border border-dashed border-slate-200 bg-white p-5 text-sm text-slate-500">
-              กำลังโหลดบทความ...
+              กำลังโหลด...
             </div>
-          ) : articles.length === 0 ? (
+          ) : articleGroups.length === 0 ? (
             <div className="rounded-xl border border-dashed border-slate-200 bg-white p-5 text-sm leading-6 text-slate-500">
-              ยังไม่มีบทความ กด “เพิ่มใหม่” แล้วเริ่มเขียนบทความแรกได้เลย
+              ยังไม่มีรายการ กด “เพิ่มใหม่” เพื่อเริ่มเขียน
             </div>
           ) : (
-            articles.map((article) => (
-              <button
-                key={article.id}
-                type="button"
-                onClick={() => {
-                  setDraft(articleToDraft(article))
-                  setMessage("")
-                  setError("")
-                }}
-                className={`rounded-xl border p-4 text-left transition ${
-                  draft.id === article.id
-                    ? "border-amber-300 bg-amber-50 shadow-sm"
-                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <span className="line-clamp-2 text-sm font-extrabold leading-5 text-slate-950">
-                    {article.title}
-                  </span>
-                  <div className="flex shrink-0 flex-col items-end gap-1">
-                    <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-extrabold text-blue-700">
-                      {article.language.toUpperCase()}
+            articleGroups.map((group) => {
+              const mainArticle = group.th ?? group.en
+              return (
+                <button
+                  key={group.id}
+                  type="button"
+                  onClick={() => {
+                    setDraft(groupToDraft(group))
+                    setMessage("")
+                    setError("")
+                  }}
+                  className={`rounded-xl border p-4 text-left transition ${
+                    draft.translationGroupId === group.id
+                      ? "border-amber-300 bg-amber-50 shadow-sm"
+                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="line-clamp-2 text-sm font-extrabold leading-5 text-slate-950">
+                      {group.th?.title || group.en?.title || "ไม่มีหัวข้อ"}
                     </span>
                     <span
-                      className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold ${
-                        article.published
+                      className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-extrabold ${
+                        mainArticle?.published
                           ? "bg-green-100 text-green-700"
                           : "bg-slate-100 text-slate-600"
                       }`}
                     >
-                      {article.published ? "เผยแพร่" : "ร่าง"}
+                      {mainArticle?.published ? "เผยแพร่" : "ร่าง"}
                     </span>
                   </div>
-                </div>
-                <p className="mt-2 text-xs text-slate-500">/{article.slug}</p>
-              </button>
-            ))
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {group.th && <span className="rounded-full bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700">TH</span>}
+                    {group.en && <span className="rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-bold text-indigo-700">EN</span>}
+                  </div>
+                </button>
+              )
+            })
           )}
         </div>
       </section>
@@ -460,10 +658,10 @@ function ArticleManager() {
           <div>
             <h2 className="flex items-center gap-2 text-lg font-extrabold text-slate-950">
               <FilePenLine className="size-5 text-amber-600" />
-              {draft.id ? "แก้ไขบทความ" : "เพิ่มบทความใหม่"}
+              {selectedGroup ? "แก้ไขรายการ" : "เพิ่มรายการใหม่"}
             </h2>
             <p className="mt-1 text-sm leading-6 text-slate-500">
-              กรอกหัวข้อ คำโปรย เนื้อหา เลือกภาษา และเปิดเผยแพร่เมื่อพร้อม
+              กรอกข้อมูลภาษาไทยด้านบน และภาษาอังกฤษด้านล่าง
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -473,7 +671,7 @@ function ArticleManager() {
               variant={viewMode === "edit" ? "gold" : "outline"}
               className="h-10 px-4 text-xs font-extrabold"
             >
-              เขียนบทความ
+              เขียนเนื้อหา
             </Button>
             <Button
               type="button"
@@ -481,47 +679,30 @@ function ArticleManager() {
               variant={viewMode === "preview" ? "gold" : "outline"}
               className="h-10 px-4 text-xs font-extrabold"
             >
-              ดูตัวอย่างก่อนเผยแพร่
+              ดูตัวอย่าง
             </Button>
-            {selectedArticle?.published && (
-              <Link
-                href={`/articles/${selectedArticle.slug}`}
-                target="_blank"
-                className="inline-flex h-10 items-center text-xs font-extrabold text-amber-700 transition hover:text-amber-900"
-              >
-                ดูบทความจริง
-                <ExternalLink className="ml-1.5 size-3.5" />
-              </Link>
-            )}
           </div>
         </div>
 
         {viewMode === "preview" ? (
           <ArticlePreview draft={draft} />
         ) : (
-          <div className="mt-6 flex flex-col gap-5">
-            <ArticleLanguagePicker
-              value={draft.language}
-              onChange={(value) => updateDraft("language", value)}
-            />
-
-            <AdminInput
-              label="หัวข้อบทความ"
-              value={draft.title}
-              onChange={(value) => {
-                updateDraft("title", value)
-                if (!draft.id && !draft.slug) updateDraft("slug", makeSlug(value))
-              }}
-              placeholder="เช่น บริษัทควรเลือก รปภ. อย่างไรให้เหมาะกับหน้างาน"
-            />
-
+          <div className="mt-6 flex flex-col gap-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <AdminInput
-                label="หมวดหมู่"
-                value={draft.category}
-                onChange={(value) => updateDraft("category", value)}
-                placeholder="ข่าวสาร / ความรู้ความปลอดภัย"
-              />
+              <label className="flex flex-col gap-2">
+                <span className="text-xs font-extrabold text-slate-700">ประเภท</span>
+                <select
+                  value={draft.category}
+                  onChange={(event) => updateDraft("category", event.target.value as ArticleCategory)}
+                  className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-950 shadow-sm outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
+                >
+                  {CATEGORY_OPTIONS.map((option) => (
+                    <option key={option.label} value={option.label}>
+                      {option.label} — {option.description}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <AdminInput
                 label="วันที่เผยแพร่"
                 type="date"
@@ -530,28 +711,24 @@ function ArticleManager() {
               />
             </div>
 
-            <AdminTextarea
-              label="คำโปรย / สรุปบทความ"
-              value={draft.excerpt}
-              onChange={(value) => updateDraft("excerpt", value)}
-              rows={3}
-              placeholder="เขียนสรุปสั้น ๆ ให้ลูกค้าเข้าใจว่าบทความนี้เกี่ยวกับอะไร"
+            <ImageUploader
+              imageUrl={draft.coverImageUrl}
+              isUploading={isUploadingImage}
+              onUpload={handleImageUpload}
             />
 
-            <AdminTextarea
-              label="เนื้อหาบทความ"
-              value={draft.content}
-              onChange={(value) => updateDraft("content", value)}
-              rows={16}
-              placeholder="เขียนเนื้อหาบทความ แยกย่อหน้าด้วยการเว้นบรรทัด"
+            <LanguageFields
+              title="ภาษาไทย"
+              description="ข้อความนี้จะแสดงบนหน้าเว็บภาษาไทย"
+              value={draft.th}
+              onChange={(key, value) => updateLocalizedDraft("th", key, value)}
             />
 
-            <AdminInput
-              label="รูปปก (URL)"
-              value={draft.coverImageUrl}
-              onChange={(value) => updateDraft("coverImageUrl", value)}
-              placeholder="/images/patrol-team.jpg หรือ https://..."
-              helpText="ถ้ายังไม่มีรูป สามารถเว้นว่างไว้ก่อนได้"
+            <LanguageFields
+              title="English"
+              description="This content appears on the English version."
+              value={draft.en}
+              onChange={(key, value) => updateLocalizedDraft("en", key, value)}
             />
           </div>
         )}
@@ -559,12 +736,14 @@ function ArticleManager() {
         {(message || error) && (
           <div
             className={`mt-5 flex items-start gap-2 rounded-xl p-4 text-sm font-bold ${
-              error
-                ? "bg-red-50 text-red-700"
-                : "bg-green-50 text-green-700"
+              error ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"
             }`}
           >
-            {error ? <AlertCircle className="mt-0.5 size-4 shrink-0" /> : <CheckCircle className="mt-0.5 size-4 shrink-0" />}
+            {error ? (
+              <AlertCircle className="mt-0.5 size-4 shrink-0" />
+            ) : (
+              <CheckCircle className="mt-0.5 size-4 shrink-0" />
+            )}
             {error || message}
           </div>
         )}
@@ -573,7 +752,7 @@ function ArticleManager() {
           <Button
             type="button"
             onClick={() => handleSaveArticle(false)}
-            disabled={isSaving}
+            disabled={isSaving || isUploadingImage}
             variant="outline"
             className="h-12 bg-white font-extrabold"
           >
@@ -583,7 +762,7 @@ function ArticleManager() {
           <Button
             type="button"
             onClick={() => setViewMode("preview")}
-            disabled={isSaving}
+            disabled={isSaving || isUploadingImage}
             variant="outline"
             className="h-12 bg-white font-extrabold"
           >
@@ -592,23 +771,23 @@ function ArticleManager() {
           <Button
             type="button"
             onClick={() => handleSaveArticle(true)}
-            disabled={isSaving}
+            disabled={isSaving || isUploadingImage}
             variant="gold"
             className="h-12 font-extrabold"
           >
             <Send className="mr-2 size-4" />
-            เผยแพร่บทความ
+            เผยแพร่
           </Button>
-          {draft.id && (
+          {(draft.th.id || draft.en.id) && (
             <Button
               type="button"
               onClick={handleDeleteArticle}
-              disabled={isSaving}
+              disabled={isSaving || isUploadingImage}
               variant="destructive"
               className="h-12 font-bold sm:ml-auto"
             >
               <Trash2 className="mr-2 size-4" />
-              ลบบทความ
+              ลบรายการนี้
             </Button>
           )}
         </div>
@@ -617,98 +796,160 @@ function ArticleManager() {
   )
 }
 
+function ImageUploader({
+  imageUrl,
+  isUploading,
+  onUpload,
+}: {
+  imageUrl: string
+  isUploading: boolean
+  onUpload: (file: File | undefined) => void
+}) {
+  return (
+    <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="flex items-center gap-2 text-sm font-extrabold text-slate-900">
+            <ImagePlus className="size-4 text-amber-600" />
+            รูปปก
+          </p>
+          <p className="mt-1 text-xs leading-5 text-slate-500">
+            เลือกรูปจากเครื่อง ระบบจะย่อและแปลงเป็น WebP ให้อัตโนมัติ
+          </p>
+        </div>
+        <label className="inline-flex h-11 cursor-pointer items-center justify-center rounded-xl bg-slate-950 px-4 text-xs font-extrabold text-white transition hover:bg-slate-800">
+          {isUploading ? "กำลังอัปโหลด..." : "เลือกรูป"}
+          <input
+            type="file"
+            accept="image/*"
+            className="sr-only"
+            disabled={isUploading}
+            onChange={(event) => {
+              void onUpload(event.target.files?.[0])
+              event.target.value = ""
+            }}
+          />
+        </label>
+      </div>
+      {imageUrl && (
+        <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={imageUrl} alt="รูปปกบทความ" className="max-h-72 w-full object-cover" />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function LanguageFields({
+  title,
+  description,
+  value,
+  onChange,
+}: {
+  title: string
+  description: string
+  value: LocalizedDraft
+  onChange: (key: keyof LocalizedDraft, value: string) => void
+}) {
+  return (
+    <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+      <div className="mb-5 border-b border-slate-200 pb-4">
+        <h3 className="text-lg font-extrabold text-slate-950">{title}</h3>
+        <p className="mt-1 text-sm text-slate-500">{description}</p>
+      </div>
+      <div className="flex flex-col gap-5">
+        <AdminInput
+          label="หัวข้อ"
+          value={value.title}
+          onChange={(nextValue) => onChange("title", nextValue)}
+          placeholder={title === "ภาษาไทย" ? "เช่น 5 วิธีเลือกบริษัทรักษาความปลอดภัย" : "e.g. 5 tips for choosing a security company"}
+        />
+        <AdminTextarea
+          label="สรุปสั้น ๆ"
+          value={value.summary}
+          onChange={(nextValue) => onChange("summary", nextValue)}
+          rows={3}
+          placeholder={title === "ภาษาไทย" ? "เขียนสั้น ๆ ว่าเนื้อหานี้เกี่ยวกับอะไร" : "Briefly describe what this article is about."}
+        />
+        <AdminTextarea
+          label="เนื้อหา"
+          value={value.content}
+          onChange={(nextValue) => onChange("content", nextValue)}
+          rows={12}
+          placeholder={title === "ภาษาไทย" ? "เขียนเนื้อหา แยกย่อหน้าด้วยการเว้นบรรทัด" : "Write the content. Use blank lines between paragraphs."}
+        />
+      </div>
+    </div>
+  )
+}
+
 function ArticlePreview({ draft }: { draft: ArticleDraft }) {
-  const title = draft.title.trim() || "หัวข้อบทความจะแสดงที่นี่"
-  const excerpt = getPlainExcerpt(draft) || "คำโปรยบทความจะแสดงตรงนี้ เพื่อให้ตรวจทานก่อนเผยแพร่"
-  const category = draft.category.trim() || "ข่าวสาร"
+  return (
+    <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <ArticleLanguagePreview
+        label="ภาษาไทย"
+        category={draft.category}
+        imageUrl={draft.coverImageUrl}
+        draft={draft.th}
+      />
+      <ArticleLanguagePreview
+        label="English"
+        category={getCategoryForLanguage(draft.category, "en")}
+        imageUrl={draft.coverImageUrl}
+        draft={draft.en}
+      />
+    </div>
+  )
+}
+
+function ArticleLanguagePreview({
+  label,
+  category,
+  imageUrl,
+  draft,
+}: {
+  label: string
+  category: string
+  imageUrl: string
+  draft: LocalizedDraft
+}) {
+  const title = draft.title.trim() || "หัวข้อจะแสดงตรงนี้"
+  const summary = draft.summary.trim() || "สรุปสั้น ๆ จะแสดงตรงนี้"
   const paragraphs = splitPreviewParagraphs(draft.content)
 
   return (
-    <div className="mt-6 bg-white">
-      <div className="mb-5 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
-        <strong>Preview:</strong> หน้านี้เป็นตัวอย่างสำหรับตรวจข้อความและรูปแบบก่อนกดเผยแพร่ ยังไม่แสดงบนหน้า public จนกว่าจะกด “เผยแพร่บทความ”
-        <span className="ml-2 font-bold">ภาษา: {getLanguageLabel(draft.language)}</span>
+    <article className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+      <div className="border-b border-slate-200 px-5 py-4">
+        <p className="text-xs font-extrabold uppercase tracking-wide text-amber-700">{label}</p>
       </div>
-
-      <article className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-        <div className="bg-slate-950 px-6 py-10 text-white sm:px-8">
-          <div className="mb-4 inline-flex rounded-full bg-amber-400 px-3 py-1 text-xs font-extrabold text-slate-950">
-            {category}
-          </div>
-          <h3 className="text-2xl font-extrabold leading-tight sm:text-4xl">{title}</h3>
-          <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-300 sm:text-base">{excerpt}</p>
+      {imageUrl && (
+        <div className="bg-slate-100">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={imageUrl} alt={title} className="h-52 w-full object-cover" />
         </div>
-
-        {draft.coverImageUrl.trim() && (
-          <div className="border-b border-slate-200 bg-slate-100 px-6 py-6 sm:px-8">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={draft.coverImageUrl.trim()}
-              alt={title}
-              className="max-h-[360px] w-full rounded-xl object-cover"
-            />
-          </div>
-        )}
-
-        <div className="px-6 py-8 sm:px-8">
+      )}
+      <div className="p-5">
+        <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-extrabold text-amber-800">
+          {category}
+        </span>
+        <h3 className="mt-4 text-2xl font-extrabold leading-tight text-slate-950">{title}</h3>
+        <p className="mt-3 text-sm leading-6 text-slate-600">{summary}</p>
+        <div className="mt-6 border-t border-slate-200 pt-5">
           {paragraphs.length === 0 ? (
             <p className="text-sm leading-7 text-slate-500">
-              เนื้อหาบทความจะแสดงตรงนี้หลังจากเริ่มเขียนในช่องเนื้อหา
+              เนื้อหาจะแสดงตรงนี้หลังจากเริ่มเขียน
             </p>
           ) : (
             paragraphs.map((paragraph, index) => (
-              <p key={index} className="mb-5 text-base leading-8 text-slate-700">
+              <p key={index} className="mb-4 text-sm leading-7 text-slate-700">
                 {paragraph}
               </p>
             ))
           )}
         </div>
-      </article>
-    </div>
-  )
-}
-
-function ArticleLanguagePicker({
-  value,
-  onChange,
-}: {
-  value: Language
-  onChange: (value: Language) => void
-}) {
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-2 text-xs font-extrabold text-slate-700">
-        <Globe2 className="size-4 text-amber-600" />
-        ภาษาเนื้อหา
       </div>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {(["th", "en"] as const).map((language) => {
-          const active = value === language
-          return (
-            <button
-              key={language}
-              type="button"
-              onClick={() => onChange(language)}
-              className={`rounded-2xl border px-4 py-3 text-left transition ${
-                active
-                  ? "border-amber-300 bg-amber-50 text-slate-950 shadow-sm"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
-              }`}
-            >
-              <span className="text-sm font-extrabold">{getLanguageLabel(language)}</span>
-              <span className="mt-1 block text-xs leading-5 text-slate-500">
-                {language === "th"
-                  ? "แสดงเมื่อผู้ชมเลือกภาษาไทย"
-                  : "แสดงเมื่อผู้ชมเลือก English"}
-              </span>
-            </button>
-          )
-        })}
-      </div>
-      <p className="text-xs leading-5 text-slate-500">
-        ระบบไม่แปลให้อัตโนมัติ ถ้าต้องการสองภาษา ให้สร้างบทความไทยและอังกฤษแยกกัน
-      </p>
-    </div>
+    </article>
   )
 }
 
