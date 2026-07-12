@@ -81,6 +81,19 @@ export default function AdminDashboard() {
   const router = useRouter()
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false)
 
+  React.useEffect(() => {
+    const previousBodyBackground = document.body.style.backgroundColor
+    const previousHtmlBackground = document.documentElement.style.backgroundColor
+
+    document.body.style.backgroundColor = "#f8fafc"
+    document.documentElement.style.backgroundColor = "#f8fafc"
+
+    return () => {
+      document.body.style.backgroundColor = previousBodyBackground
+      document.documentElement.style.backgroundColor = previousHtmlBackground
+    }
+  }, [])
+
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" })
     router.replace("/login")
@@ -323,7 +336,7 @@ function ArticleManager() {
 
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-[320px_1fr]">
-      <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+      <section className="self-start rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="flex items-center gap-2 text-base font-extrabold text-slate-950">
