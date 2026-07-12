@@ -6,26 +6,28 @@ import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import { LanguageProvider } from "@/context/language-context"
 import type { TranslationsDict } from "@/lib/data-store"
+import type { Language } from "@/lib/language"
 
 type SiteShellProps = {
   children: React.ReactNode
   initialTranslations: TranslationsDict
+  initialLanguage: Language
 }
 
-export default function SiteShell({ children, initialTranslations }: SiteShellProps) {
+export default function SiteShell({ children, initialTranslations, initialLanguage }: SiteShellProps) {
   const pathname = usePathname()
   const isAdminRoute = pathname?.startsWith("/admin")
 
   if (isAdminRoute) {
     return (
-      <LanguageProvider initialTranslations={initialTranslations}>
+      <LanguageProvider initialTranslations={initialTranslations} initialLanguage={initialLanguage}>
         <main className="min-h-screen flex-grow bg-slate-50">{children}</main>
       </LanguageProvider>
     )
   }
 
   return (
-    <LanguageProvider initialTranslations={initialTranslations}>
+    <LanguageProvider initialTranslations={initialTranslations} initialLanguage={initialLanguage}>
       <Navbar />
       <main className="flex-grow pt-20 lg:pt-[104px]">{children}</main>
       <Footer />

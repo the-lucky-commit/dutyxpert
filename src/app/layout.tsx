@@ -65,7 +65,9 @@ export default async function RootLayout({
         <StructuredData />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
-        <SiteShell initialTranslations={translations}>{children}</SiteShell>
+        <SiteShell initialTranslations={translations} initialLanguage={language}>
+          {children}
+        </SiteShell>
       </body>
     </html>
   )

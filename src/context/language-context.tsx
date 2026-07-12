@@ -21,6 +21,15 @@ interface LanguageContextType {
 const LANGUAGE_CHANGE_EVENT = "dxs-language-change"
 const LanguageContext = React.createContext<LanguageContextType | undefined>(undefined)
 
+function getCookieLanguage(): Language | undefined {
+  if (typeof document === "undefined") return undefined
+  const cookie = document.cookie
+    .split("; ")
+    .find((item) => item.startsWith(`${LANGUAGE_COOKIE_NAME}=`))
+  if (!cookie) return undefined
+  return normalizeLanguage(decodeURIComponent(cookie.split("=")[1] ?? ""))
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value)
 }
@@ -35,11 +44,7 @@ function subscribeToLanguage(callback: () => void) {
 }
 
 function getLanguageSnapshot(): Language {
-  return normalizeLanguage(localStorage.getItem(LANGUAGE_STORAGE_KEY))
-}
-
-function getServerLanguageSnapshot(): Language {
-  return "th"
+  return getCookieLanguage() ?? "th"
 }
 
 function findTranslation(source: unknown, keyPath: string, language: Language) {
@@ -57,14 +62,16 @@ function findTranslation(source: unknown, keyPath: string, language: Language) {
 export function LanguageProvider({
   children,
   initialTranslations = defaultTranslations,
+  initialLanguage = "th",
 }: {
   children: React.ReactNode
   initialTranslations?: TranslationsDict
+  initialLanguage?: Language
 }) {
   const language = React.useSyncExternalStore(
     subscribeToLanguage,
     getLanguageSnapshot,
-    getServerLanguageSnapshot
+    () => initialLanguage
   )
   const [translations, setTranslations] = React.useState<TranslationsDict>(initialTranslations)
 
