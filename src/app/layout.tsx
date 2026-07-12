@@ -1,11 +1,8 @@
 import type { Metadata } from "next"
 import { Inter, Noto_Sans_Thai } from "next/font/google"
 import "./globals.css"
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
-import LenisProvider from "@/components/lenis-provider"
+import SiteShell from "@/components/site-shell"
 import StructuredData from "@/components/structured-data"
-import { LanguageProvider } from "@/context/language-context"
 import { readTranslations } from "@/lib/data-store"
 
 const inter = Inter({
@@ -67,15 +64,7 @@ export default async function RootLayout({
         <StructuredData />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
-        <LanguageProvider initialTranslations={translations}>
-          <LenisProvider>
-            <Navbar />
-            <main className="flex-grow pt-20 lg:pt-[104px]">
-              {children}
-            </main>
-            <Footer />
-          </LenisProvider>
-        </LanguageProvider>
+        <SiteShell initialTranslations={translations}>{children}</SiteShell>
       </body>
     </html>
   )
