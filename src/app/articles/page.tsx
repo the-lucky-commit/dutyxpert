@@ -3,24 +3,67 @@ import Image from "next/image"
 import Link from "next/link"
 import { CalendarDays, ChevronRight, Newspaper } from "lucide-react"
 import { readPublishedArticles } from "@/lib/data-store"
+import { type Language } from "@/lib/language"
+import { getRequestLanguage } from "@/lib/server-language"
 
 export const dynamic = "force-dynamic"
 
-export const metadata: Metadata = {
-  title: "บทความและข่าวสาร | Duty Xpert Security",
-  description:
-    "บทความ ความรู้ และข่าวสารด้านการรักษาความปลอดภัยจาก บริษัท รักษาความปลอดภัย ดิวตี้ เอคซ์เพิร์ท จำกัด",
-  alternates: { canonical: "/articles" },
-  openGraph: {
-    title: "บทความและข่าวสาร | Duty Xpert Security",
-    description: "ความรู้ด้านระบบรักษาความปลอดภัย การบริหาร รปภ. และข่าวสารจาก Duty Xpert",
-    url: "https://dutyxpert.com/articles",
-    type: "website",
+const ARTICLE_COPY: Record<Language, {
+  badge: string
+  title: string
+  description: string
+  emptyTitle: string
+  emptyDescription: string
+  readMore: string
+  metaTitle: string
+  metaDescription: string
+}> = {
+  th: {
+    badge: "บทความและข่าวสาร",
+    title: "บทความและข่าวสาร",
+    description:
+      "ความรู้ด้านการรักษาความปลอดภัย การบริหารเจ้าหน้าที่ รปภ. และข่าวสารจากดิวตี้ เอคซ์เพิร์ท",
+    emptyTitle: "ยังไม่มีบทความเผยแพร่",
+    emptyDescription: "โปรดกลับมาใหม่อีกครั้งหลังจากทีมงานเผยแพร่บทความแรก",
+    readMore: "อ่านต่อ",
+    metaTitle: "บทความและข่าวสาร | Duty Xpert Security",
+    metaDescription:
+      "บทความ ความรู้ และข่าวสารด้านการรักษาความปลอดภัยจาก บริษัท รักษาความปลอดภัย ดิวตี้ เอคซ์เพิร์ท จำกัด",
+  },
+  en: {
+    badge: "Articles & News",
+    title: "Articles & News",
+    description:
+      "Security knowledge, guard operations insights, and updates from Duty Xpert Security.",
+    emptyTitle: "No articles published yet",
+    emptyDescription: "Please check back after the team publishes the first English article.",
+    readMore: "Read more",
+    metaTitle: "Articles & News | Duty Xpert Security",
+    metaDescription:
+      "Security articles, guard operations insights, and company news from Duty Xpert Security.",
   },
 }
 
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat("th-TH", {
+export async function generateMetadata(): Promise<Metadata> {
+  const language = await getRequestLanguage()
+  const copy = ARTICLE_COPY[language]
+
+  return {
+    title: copy.metaTitle,
+    description: copy.metaDescription,
+    alternates: { canonical: "/articles" },
+    openGraph: {
+      title: copy.metaTitle,
+      description: copy.metaDescription,
+      url: "https://dutyxpert.com/articles",
+      type: "website",
+      locale: language === "en" ? "en_US" : "th_TH",
+    },
+  }
+}
+
+function formatDate(date: string, language: Language) {
+  return new Intl.DateTimeFormat(language === "en" ? "en-US" : "th-TH", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -52,7 +95,9 @@ function ArticleCoverImage({ src, alt }: { src: string; alt: string }) {
 }
 
 export default async function ArticlesPage() {
-  const articles = await readPublishedArticles()
+  const language = await getRequestLanguage()
+  const copy = ARTICLE_COPY[language]
+  const articles = await readPublishedArticles(language)
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
@@ -61,14 +106,14 @@ export default async function ArticlesPage() {
         <div className="max-w-7xl mx-auto px-6 relative z-10 pt-10">
           <div className="inline-flex items-center gap-2 bg-secondary/80 border border-white/10 px-3.5 py-1.5 rounded-full text-xs font-semibold text-accent uppercase tracking-wider mb-5">
             <Newspaper className="size-4 text-accent" />
-            Articles & News
+            {copy.badge}
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight">
-            บทความและข่าวสาร
+            {copy.title}
           </h1>
           <div className="w-16 h-1 bg-accent mt-4" />
           <p className="text-slate-350 mt-5 text-base md:text-lg max-w-3xl leading-relaxed font-normal">
-            ความรู้ด้านการรักษาความปลอดภัย การบริหารเจ้าหน้าที่ รปภ. และข่าวสารจากดิวตี้ เอคซ์เพิร์ท
+            {copy.description}
           </p>
         </div>
       </section>
@@ -77,9 +122,9 @@ export default async function ArticlesPage() {
         <div className="max-w-7xl mx-auto px-6">
           {articles.length === 0 ? (
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-10 text-center">
-              <h2 className="text-2xl font-extrabold text-slate-900">ยังไม่มีบทความเผยแพร่</h2>
+              <h2 className="text-2xl font-extrabold text-slate-900">{copy.emptyTitle}</h2>
               <p className="text-slate-600 mt-3">
-                โปรดกลับมาใหม่อีกครั้งหลังจากทีมงานเผยแพร่บทความแรก
+                {copy.emptyDescription}
               </p>
             </div>
           ) : (
@@ -106,7 +151,7 @@ export default async function ArticlesPage() {
                         </span>
                         <span className="inline-flex items-center gap-1">
                           <CalendarDays className="size-3.5" />
-                          {formatDate(article.publishedAt)}
+                          {formatDate(article.publishedAt, article.language)}
                         </span>
                       </div>
                       <h2 className="text-xl font-extrabold text-slate-900 leading-snug group-hover:text-primary transition-colors">
@@ -116,7 +161,7 @@ export default async function ArticlesPage() {
                         {article.excerpt}
                       </p>
                       <span className="inline-flex items-center gap-1.5 text-sm font-bold text-primary group-hover:text-accent transition-colors mt-auto">
-                        อ่านต่อ
+                        {copy.readMore}
                         <ChevronRight className="size-4 group-hover:translate-x-1 transition-transform" />
                       </span>
                     </div>

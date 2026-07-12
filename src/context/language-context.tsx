@@ -3,8 +3,12 @@
 import * as React from "react"
 import defaultTranslations from "@/lib/translations.json"
 import type { TranslationsDict } from "@/lib/data-store"
-
-type Language = "th" | "en"
+import {
+  LANGUAGE_COOKIE_NAME,
+  LANGUAGE_STORAGE_KEY,
+  type Language,
+  normalizeLanguage,
+} from "@/lib/language"
 
 interface LanguageContextType {
   language: Language
@@ -14,7 +18,6 @@ interface LanguageContextType {
   translations: TranslationsDict
 }
 
-const LANGUAGE_STORAGE_KEY = "dxs-lang"
 const LANGUAGE_CHANGE_EVENT = "dxs-language-change"
 const LanguageContext = React.createContext<LanguageContextType | undefined>(undefined)
 
@@ -32,7 +35,7 @@ function subscribeToLanguage(callback: () => void) {
 }
 
 function getLanguageSnapshot(): Language {
-  return localStorage.getItem(LANGUAGE_STORAGE_KEY) === "en" ? "en" : "th"
+  return normalizeLanguage(localStorage.getItem(LANGUAGE_STORAGE_KEY))
 }
 
 function getServerLanguageSnapshot(): Language {
@@ -66,7 +69,9 @@ export function LanguageProvider({
   const [translations, setTranslations] = React.useState<TranslationsDict>(initialTranslations)
 
   const setLanguage = React.useCallback((nextLanguage: Language) => {
-    localStorage.setItem(LANGUAGE_STORAGE_KEY, nextLanguage)
+    const normalizedLanguage = normalizeLanguage(nextLanguage)
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, normalizedLanguage)
+    document.cookie = `${LANGUAGE_COOKIE_NAME}=${normalizedLanguage}; Path=/; Max-Age=31536000; SameSite=Lax`
     window.dispatchEvent(new Event(LANGUAGE_CHANGE_EVENT))
   }, [])
 

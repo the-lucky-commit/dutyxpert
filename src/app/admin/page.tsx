@@ -9,6 +9,7 @@ import {
   CheckCircle,
   ExternalLink,
   FilePenLine,
+  Globe2,
   LogOut,
   Newspaper,
   PlusCircle,
@@ -19,10 +20,12 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Article } from "@/lib/data-store"
+import { type Language, getLanguageLabel } from "@/lib/language"
 
 type ArticleDraft = Pick<
   Article,
   | "id"
+  | "language"
   | "slug"
   | "title"
   | "excerpt"
@@ -38,6 +41,7 @@ type ArticleDraft = Pick<
 function createEmptyArticleDraft(): ArticleDraft {
   return {
     id: "",
+    language: "th",
     slug: "",
     title: "",
     excerpt: "",
@@ -54,6 +58,7 @@ function createEmptyArticleDraft(): ArticleDraft {
 function articleToDraft(article: Article): ArticleDraft {
   return {
     id: article.id,
+    language: article.language,
     slug: article.slug,
     title: article.title,
     excerpt: article.excerpt,
@@ -244,7 +249,7 @@ export default function AdminDashboard() {
                     จัดการบทความและข่าวสาร
                   </h1>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-                    เขียนเนื้อหา ตรวจตัวอย่าง บันทึกแบบร่าง แล้วค่อยเผยแพร่เมื่อเรียบร้อย
+                    เขียนเนื้อหา เลือกภาษา ตรวจตัวอย่าง บันทึกแบบร่าง แล้วค่อยเผยแพร่เมื่อเรียบร้อย
                   </p>
                 </div>
                 <Link
@@ -428,15 +433,20 @@ function ArticleManager() {
                   <span className="line-clamp-2 text-sm font-extrabold leading-5 text-slate-950">
                     {article.title}
                   </span>
-                  <span
-                    className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-extrabold ${
-                      article.published
-                        ? "bg-green-100 text-green-700"
-                        : "bg-slate-100 text-slate-600"
-                    }`}
-                  >
-                    {article.published ? "เผยแพร่" : "ร่าง"}
-                  </span>
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-extrabold text-blue-700">
+                      {article.language.toUpperCase()}
+                    </span>
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold ${
+                        article.published
+                          ? "bg-green-100 text-green-700"
+                          : "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {article.published ? "เผยแพร่" : "ร่าง"}
+                    </span>
+                  </div>
                 </div>
                 <p className="mt-2 text-xs text-slate-500">/{article.slug}</p>
               </button>
@@ -453,7 +463,7 @@ function ArticleManager() {
               {draft.id ? "แก้ไขบทความ" : "เพิ่มบทความใหม่"}
             </h2>
             <p className="mt-1 text-sm leading-6 text-slate-500">
-              กรอกหัวข้อ คำโปรย เนื้อหา และเปิดเผยแพร่เมื่อพร้อม ระบบจะใช้ข้อมูลนี้บนหน้าเว็บจริง
+              กรอกหัวข้อ คำโปรย เนื้อหา เลือกภาษา และเปิดเผยแพร่เมื่อพร้อม
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -490,6 +500,11 @@ function ArticleManager() {
           <ArticlePreview draft={draft} />
         ) : (
           <div className="mt-6 flex flex-col gap-5">
+            <ArticleLanguagePicker
+              value={draft.language}
+              onChange={(value) => updateDraft("language", value)}
+            />
+
             <AdminInput
               label="หัวข้อบทความ"
               value={draft.title}
@@ -612,6 +627,7 @@ function ArticlePreview({ draft }: { draft: ArticleDraft }) {
     <div className="mt-6 bg-white">
       <div className="mb-5 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
         <strong>Preview:</strong> หน้านี้เป็นตัวอย่างสำหรับตรวจข้อความและรูปแบบก่อนกดเผยแพร่ ยังไม่แสดงบนหน้า public จนกว่าจะกด “เผยแพร่บทความ”
+        <span className="ml-2 font-bold">ภาษา: {getLanguageLabel(draft.language)}</span>
       </div>
 
       <article className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
@@ -648,6 +664,50 @@ function ArticlePreview({ draft }: { draft: ArticleDraft }) {
           )}
         </div>
       </article>
+    </div>
+  )
+}
+
+function ArticleLanguagePicker({
+  value,
+  onChange,
+}: {
+  value: Language
+  onChange: (value: Language) => void
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-2 text-xs font-extrabold text-slate-700">
+        <Globe2 className="size-4 text-amber-600" />
+        ภาษาเนื้อหา
+      </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {(["th", "en"] as const).map((language) => {
+          const active = value === language
+          return (
+            <button
+              key={language}
+              type="button"
+              onClick={() => onChange(language)}
+              className={`rounded-2xl border px-4 py-3 text-left transition ${
+                active
+                  ? "border-amber-300 bg-amber-50 text-slate-950 shadow-sm"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+              }`}
+            >
+              <span className="text-sm font-extrabold">{getLanguageLabel(language)}</span>
+              <span className="mt-1 block text-xs leading-5 text-slate-500">
+                {language === "th"
+                  ? "แสดงเมื่อผู้ชมเลือกภาษาไทย"
+                  : "แสดงเมื่อผู้ชมเลือก English"}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+      <p className="text-xs leading-5 text-slate-500">
+        ระบบไม่แปลให้อัตโนมัติ ถ้าต้องการสองภาษา ให้สร้างบทความไทยและอังกฤษแยกกัน
+      </p>
     </div>
   )
 }

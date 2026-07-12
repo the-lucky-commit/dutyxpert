@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Menu, X, ChevronDown, Phone, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -11,6 +11,7 @@ import { useLanguage } from "@/context/language-context"
 
 export default function Navbar() {
   const pathname = usePathname()
+  const router = useRouter()
   const { language, setLanguage, t } = useLanguage()
   const [isOpen, setIsOpen] = React.useState(false)
   const [isServicesOpen, setIsServicesOpen] = React.useState(false)
@@ -57,6 +58,10 @@ export default function Navbar() {
   }, [isOpen])
 
   const isActive = (path: string) => pathname === path
+  const toggleLanguage = () => {
+    setLanguage(language === "th" ? "en" : "th")
+    router.refresh()
+  }
 
   return (
     <>
@@ -86,7 +91,7 @@ export default function Navbar() {
             
             {/* Language Selector */}
             <button 
-              onClick={() => setLanguage(language === "th" ? "en" : "th")}
+              onClick={toggleLanguage}
               className="flex items-center gap-1.5 hover:text-[#E2E8F0] transition-colors text-[#E8C547] font-extrabold"
             >
               <Globe className="size-3" />
@@ -281,7 +286,7 @@ export default function Navbar() {
           <div className="flex justify-between items-center py-4 border-b border-white/[0.06]">
             <span className="text-sm font-medium text-slate-400">ภาษา / Language</span>
             <button
-              onClick={() => setLanguage(language === "th" ? "en" : "th")}
+              onClick={toggleLanguage}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/5 border border-white/10 text-xs font-bold text-accent"
             >
               <Globe className="size-4" />

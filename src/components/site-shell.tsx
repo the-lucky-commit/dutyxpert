@@ -4,7 +4,6 @@ import * as React from "react"
 import { usePathname } from "next/navigation"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
-import LenisProvider from "@/components/lenis-provider"
 import { LanguageProvider } from "@/context/language-context"
 import type { TranslationsDict } from "@/lib/data-store"
 
@@ -27,11 +26,9 @@ export default function SiteShell({ children, initialTranslations }: SiteShellPr
 
   return (
     <LanguageProvider initialTranslations={initialTranslations}>
-      <LenisProvider>
-        <Navbar />
-        <main className="flex-grow pt-20 lg:pt-[104px]">{children}</main>
-        <Footer />
-      </LenisProvider>
+      <Navbar />
+      <main className="flex-grow pt-20 lg:pt-[104px]">{children}</main>
+      <Footer />
     </LanguageProvider>
   )
 }

@@ -1,11 +1,13 @@
 import { appendFile, mkdir, readFile, rename, writeFile } from "fs/promises"
 import path from "path"
 import defaultTranslations from "@/lib/translations.json"
+import { type Language, normalizeLanguage } from "@/lib/language"
 
 export type TranslationsDict = typeof defaultTranslations
 
 export type Article = {
   id: string
+  language: Language
   slug: string
   title: string
   excerpt: string
@@ -152,6 +154,7 @@ export function sanitizeArticle(value: unknown): Article {
 
   const now = new Date().toISOString()
   const id = sanitizeString(value.id ?? "", 80, "id")
+  const language = normalizeLanguage(value.language)
   const slug = sanitizeString(value.slug, 120, "slug").toLowerCase()
   const title = sanitizeString(value.title, 160, "title")
   const excerpt = sanitizeString(value.excerpt, 320, "excerpt")
@@ -168,6 +171,7 @@ export function sanitizeArticle(value: unknown): Article {
 
   return {
     id,
+    language,
     slug,
     title,
     excerpt,
@@ -226,12 +230,18 @@ export async function writeArticles(articles: Article[]) {
   await rename(temporaryPath, targetPath)
 }
 
-export async function readPublishedArticles() {
+export async function readPublishedArticles(language?: Language) {
   const articles = await readArticles()
-  return articles.filter((article) => article.published)
+  return articles.filter((article) => {
+    if (!article.published) return false
+    return language ? article.language === language : true
+  })
 }
 
-export async function readPublishedArticleBySlug(slug: string) {
+export async function readPublishedArticleBySlug(slug: string, language?: Language) {
   const articles = await readPublishedArticles()
-  return articles.find((article) => article.slug === slug)
+  return articles.find((article) => {
+    if (article.slug !== slug) return false
+    return language ? article.language === language : true
+  })
 }

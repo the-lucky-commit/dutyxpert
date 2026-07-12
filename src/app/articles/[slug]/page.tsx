@@ -10,6 +10,7 @@ import {
   getArticleOgImage,
 } from "@/lib/article-seo"
 import { readPublishedArticleBySlug } from "@/lib/data-store"
+import { type Language } from "@/lib/language"
 
 export const dynamic = "force-dynamic"
 
@@ -17,8 +18,21 @@ type ArticlePageProps = {
   params: Promise<{ slug: string }>
 }
 
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat("th-TH", {
+const DETAIL_COPY: Record<Language, { back: string; cta: string; notFoundTitle: string }> = {
+  th: {
+    back: "กลับไปหน้าบทความ",
+    cta: "ปรึกษาผู้เชี่ยวชาญด้านความปลอดภัย",
+    notFoundTitle: "ไม่พบบทความ | Duty Xpert",
+  },
+  en: {
+    back: "Back to articles",
+    cta: "Talk to a security specialist",
+    notFoundTitle: "Article not found | Duty Xpert",
+  },
+}
+
+function formatDate(date: string, language: Language) {
+  return new Intl.DateTimeFormat(language === "en" ? "en-US" : "th-TH", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -81,6 +95,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
       description,
       url: canonicalUrl,
       type: "article",
+      locale: article.language === "en" ? "en_US" : "th_TH",
       publishedTime: article.publishedAt,
       modifiedTime: article.updatedAt,
       images: [{ url: ogImage, alt: article.title }],
@@ -100,6 +115,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
   if (!article) notFound()
 
   const paragraphs = splitParagraphs(article.content)
+  const copy = DETAIL_COPY[article.language]
 
   return (
     <article className="min-h-screen bg-white text-slate-900">
@@ -111,7 +127,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
             className="inline-flex items-center gap-2 text-sm font-bold text-slate-300 hover:text-accent transition-colors mb-8"
           >
             <ArrowLeft className="size-4" />
-            กลับไปหน้าบทความ
+            {copy.back}
           </Link>
 
           <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300 font-semibold mb-5">
@@ -121,7 +137,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
             </span>
             <span className="inline-flex items-center gap-1.5">
               <CalendarDays className="size-4 text-accent" />
-              {formatDate(article.publishedAt)}
+              {formatDate(article.publishedAt, article.language)}
             </span>
           </div>
 
@@ -157,7 +173,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
               href="/contact"
               className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-secondary transition-colors"
             >
-              ปรึกษาผู้เชี่ยวชาญด้านความปลอดภัย
+              {copy.cta}
             </Link>
           </div>
         </div>

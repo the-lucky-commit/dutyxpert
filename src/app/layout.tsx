@@ -4,6 +4,7 @@ import "./globals.css"
 import SiteShell from "@/components/site-shell"
 import StructuredData from "@/components/structured-data"
 import { readTranslations } from "@/lib/data-store"
+import { getRequestLanguage } from "@/lib/server-language"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -53,12 +54,12 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const translations = await readTranslations()
+  const language = await getRequestLanguage()
 
   return (
     <html
-      lang="th"
-      className={`${inter.variable} ${notoSansThai.variable} h-full antialiased scroll-smooth`}
-      data-scroll-behavior="smooth"
+      lang={language}
+      className={`${inter.variable} ${notoSansThai.variable} h-full antialiased`}
     >
       <head>
         <StructuredData />
