@@ -20,6 +20,7 @@ npm run lint       # ESLint
 npm run typecheck  # TypeScript check
 npm run build      # production build using webpack fallback
 npm run check      # lint + typecheck + build
+npm run build:cpanel-bundle # local build + create cPanel deploy artifact
 npm start          # production Node server for cPanel/Passenger
 ```
 
@@ -80,18 +81,36 @@ Node app configuration:
 - Node version: 22.x
 - Production env should include `DUTYXPERT_DATA_DIR=/home/dutyxcnk/dutyxpert-data`
 
-After uploading source:
+Duty Xpert deploys to cPanel from a prebuilt artifact at:
+
+```text
+deploy/dutyxpert-cpanel.tar.gz
+```
+
+Do not run `npm install` or `npm run build` on cPanel as a routine deploy step. This is a shared hosting environment and process/resource limits can interrupt Next.js builds. Build locally, commit the refreshed artifact, then use cPanel Git Version Control.
+
+Deploy flow:
 
 ```bash
-npm ci --include=dev
-npm run build
-npm prune --omit=dev
-mkdir -p tmp && touch tmp/restart.txt
+npm run check
+npm run build:cpanel-bundle
+git add .
+git commit -m "..."
+git push origin main
 ```
+
+Then in cPanel Git Version Control:
+
+1. Click `Update from Remote`.
+2. Click `Deploy HEAD Commit`.
+3. Verify production.
+
+`.cpanel.yml` extracts `deploy/dutyxpert-cpanel.tar.gz` into `/home/dutyxcnk/dutyxpert-app` and touches `tmp/restart.txt` to restart the Node app.
 
 ## Production checklist
 
 - Run `npm run check` before deploy.
+- Run `npm run build:cpanel-bundle` and commit `deploy/dutyxpert-cpanel.tar.gz` before cPanel deploys that need a new `.next` build.
 - Confirm required env variables exist on the target platform.
 - Confirm `/login` does not expose any mock credentials.
 - Confirm `/admin` redirects without a valid session and loads after login.

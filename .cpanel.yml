@@ -1,5 +1,6 @@
 ---
 deployment:
   tasks:
+    - cd /home/dutyxcnk/dutyxpert-app && /bin/tar -xzf deploy/dutyxpert-cpanel.tar.gz -C /home/dutyxcnk/dutyxpert-app
     - /bin/mkdir -p /home/dutyxcnk/dutyxpert-app/tmp
     - /bin/touch /home/dutyxcnk/dutyxpert-app/tmp/restart.txt
