@@ -31,10 +31,22 @@ rmSync(output, { force: true })
 
 const result = spawnSync(
   "tar",
-  ["-czf", output, "--exclude=.next/cache", "--exclude=.next/dev", ...requiredPaths],
+  [
+    "--no-xattrs",
+    "--no-acls",
+    "-czf",
+    output,
+    "--exclude=.next/cache",
+    "--exclude=.next/dev",
+    ...requiredPaths,
+  ],
   {
     cwd: root,
-    env: { ...process.env, COPYFILE_DISABLE: "1" },
+    env: {
+      ...process.env,
+      COPYFILE_DISABLE: "1",
+      COPY_EXTENDED_ATTRIBUTES_DISABLE: "1",
+    },
     stdio: "inherit",
   }
 )
