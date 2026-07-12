@@ -8,6 +8,7 @@ Production-oriented Next.js website for บริษัท รักษาคว
 - TypeScript strict
 - Tailwind CSS v4
 - File-backed admin translations/contact submissions
+- File-backed articles/news CMS for admin-managed SEO content
 - Vercel for temporary/dev public URL
 - cPanel/Nokhosting-compatible Node runtime via `server.js`
 
@@ -40,6 +41,7 @@ Notes:
 - `SESSION_SECRET` must be at least 32 characters.
 - `DUTYXPERT_DATA_DIR` should point outside the app directory on persistent servers, for example `/home/dutyxcnk/dutyxpert-data`.
 - On Vercel, use `/tmp/dutyxpert-data`; this is writable but ephemeral, so do not treat it as permanent storage.
+- Admin-created articles are stored in `articles.json` under `DUTYXPERT_DATA_DIR`. Back up this directory before server moves or redeploy workflows that replace hosting storage.
 
 ## Optional email notification
 
@@ -93,5 +95,6 @@ mkdir -p tmp && touch tmp/restart.txt
 - Confirm required env variables exist on the target platform.
 - Confirm `/login` does not expose any mock credentials.
 - Confirm `/admin` redirects without a valid session and loads after login.
+- Confirm `/admin` article create/edit/publish writes to persistent `DUTYXPERT_DATA_DIR`.
 - Configure SMTP before expecting contact-form email notifications.
 - After domain migration, run/verify AutoSSL on hosting.

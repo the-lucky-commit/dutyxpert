@@ -14,12 +14,15 @@ import {
   Building,
   Home,
   Shield,
-  FileText
+  FileText,
+  Newspaper,
+  PlusCircle,
+  Trash2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import type { TranslationsDict } from "@/lib/data-store"
+import type { Article, TranslationsDict } from "@/lib/data-store"
 
-type TabType = "general" | "homepage" | "about" | "services"
+type TabType = "general" | "homepage" | "about" | "services" | "articles"
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value)
@@ -145,7 +148,8 @@ export default function AdminDashboard() {
             { id: "general", label: "ข้อมูลบริษัททั่วไป", icon: Building },
             { id: "homepage", label: "ข้อมูลหน้าแรก", icon: Home },
             { id: "about", label: "ข้อมูลหน้าเกี่ยวกับเรา", icon: Shield },
-            { id: "services", label: "ข้อมูลหน้าบริการ", icon: FileText }
+            { id: "services", label: "ข้อมูลหน้าบริการ", icon: FileText },
+            { id: "articles", label: "บทความและข่าวสาร", icon: Newspaper }
           ].map((tab) => {
             const TabIcon = tab.icon
             const isSelected = activeTab === tab.id
@@ -166,15 +170,17 @@ export default function AdminDashboard() {
           })}
 
           <div className="mt-8 border-t border-white/[0.06] pt-6 flex flex-col gap-4">
-            <Button
-              onClick={handleSave}
-              disabled={isSaving}
-              variant="gold"
-              className="w-full py-5 font-extrabold text-xs tracking-wider flex items-center justify-center gap-2"
-            >
-              <Save className="size-4" />
-              {isSaving ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}
-            </Button>
+            {activeTab !== "articles" && (
+              <Button
+                onClick={handleSave}
+                disabled={isSaving}
+                variant="gold"
+                className="w-full py-5 font-extrabold text-xs tracking-wider flex items-center justify-center gap-2"
+              >
+                <Save className="size-4" />
+                {isSaving ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}
+              </Button>
+            )}
 
             {saveSuccess && (
               <div className="bg-green-950/60 border border-green-500/30 rounded-lg p-3 flex gap-2 items-center text-[10px] text-green-300 font-semibold animate-fade-in">
@@ -202,15 +208,20 @@ export default function AdminDashboard() {
                 {activeTab === "homepage" && "เนื้อหาจัดแสดงในหน้าแรก (Homepage)"}
                 {activeTab === "about" && "เนื้อหาจัดแสดงในหน้าเกี่ยวกับเรา (About)"}
                 {activeTab === "services" && "เนื้อหาจัดแสดงในหน้าบริการ (Services)"}
+                {activeTab === "articles" && "จัดการบทความและข่าวสาร (Articles CMS)"}
               </h2>
               <p className="text-xs text-slate-400 mt-1 font-normal">
-                ระบุข้อมูลคำอธิบายจริงได้ทั้งในภาษาไทยและภาษาอังกฤษ
+                {activeTab === "articles"
+                  ? "เพิ่ม แก้ไข ลบ และเผยแพร่บทความสำหรับ SEO ได้จากหน้านี้"
+                  : "ระบุข้อมูลคำอธิบายจริงได้ทั้งในภาษาไทยและภาษาอังกฤษ"}
               </p>
             </div>
-            <div className="flex items-center gap-1 text-[10px] text-slate-400 bg-white/5 border border-white/[0.06] px-2.5 py-1 rounded-md">
-              <Globe className="size-3 text-accent" />
-              <span>โหมดสลับสองภาษา</span>
-            </div>
+            {activeTab !== "articles" && (
+              <div className="flex items-center gap-1 text-[10px] text-slate-400 bg-white/5 border border-white/[0.06] px-2.5 py-1 rounded-md">
+                <Globe className="size-3 text-accent" />
+                <span>โหมดสลับสองภาษา</span>
+              </div>
+            )}
           </div>
 
           {/* Form Fields container */}
@@ -413,10 +424,418 @@ export default function AdminDashboard() {
                 />
               </div>
             )}
+
+            {activeTab === "articles" && <ArticleManager />}
           </div>
         </main>
       </div>
     </div>
+  )
+}
+
+type ArticleDraft = Pick<
+  Article,
+  | "id"
+  | "slug"
+  | "title"
+  | "excerpt"
+  | "content"
+  | "category"
+  | "coverImageUrl"
+  | "metaTitle"
+  | "metaDescription"
+  | "published"
+  | "publishedAt"
+>
+
+function createEmptyArticleDraft(): ArticleDraft {
+  return {
+    id: "",
+    slug: "",
+    title: "",
+    excerpt: "",
+    content: "",
+    category: "ข่าวสาร",
+    coverImageUrl: "",
+    metaTitle: "",
+    metaDescription: "",
+    published: false,
+    publishedAt: new Date().toISOString().slice(0, 10),
+  }
+}
+
+function articleToDraft(article: Article): ArticleDraft {
+  return {
+    id: article.id,
+    slug: article.slug,
+    title: article.title,
+    excerpt: article.excerpt,
+    content: article.content,
+    category: article.category,
+    coverImageUrl: article.coverImageUrl,
+    metaTitle: article.metaTitle,
+    metaDescription: article.metaDescription,
+    published: article.published,
+    publishedAt: article.publishedAt.slice(0, 10),
+  }
+}
+
+function makeSlug(input: string) {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 120)
+}
+
+function ArticleManager() {
+  const [articles, setArticles] = React.useState<Article[]>([])
+  const [draft, setDraft] = React.useState<ArticleDraft>(() => createEmptyArticleDraft())
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [isSaving, setIsSaving] = React.useState(false)
+  const [message, setMessage] = React.useState("")
+  const [error, setError] = React.useState("")
+
+  const selectedArticle = articles.find((article) => article.id === draft.id)
+
+  const loadArticles = React.useCallback(async () => {
+    setIsLoading(true)
+    setError("")
+    try {
+      const response = await fetch("/api/articles", { cache: "no-store" })
+      if (!response.ok) throw new Error("Unable to load articles")
+      setArticles((await response.json()) as Article[])
+    } catch {
+      setError("ไม่สามารถโหลดรายการบทความได้")
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  React.useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void loadArticles()
+    }, 0)
+    return () => window.clearTimeout(timeoutId)
+  }, [loadArticles])
+
+  const updateDraft = <K extends keyof ArticleDraft>(key: K, value: ArticleDraft[K]) => {
+    setDraft((previous) => ({ ...previous, [key]: value }))
+  }
+
+  const resetForm = () => {
+    setDraft(createEmptyArticleDraft())
+    setMessage("")
+    setError("")
+  }
+
+  const handleSaveArticle = async () => {
+    setIsSaving(true)
+    setMessage("")
+    setError("")
+
+    try {
+      const method = draft.id ? "PUT" : "POST"
+      const response = await fetch("/api/articles", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(draft),
+      })
+      const result = (await response.json()) as Article | { error?: string }
+      if (!response.ok) {
+        setError("error" in result && result.error ? result.error : "ไม่สามารถบันทึกบทความได้")
+        return
+      }
+
+      const savedArticle = result as Article
+      setArticles((previous) => {
+        const exists = previous.some((article) => article.id === savedArticle.id)
+        const nextArticles = exists
+          ? previous.map((article) => (article.id === savedArticle.id ? savedArticle : article))
+          : [savedArticle, ...previous]
+        return nextArticles.sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
+      })
+      setDraft(articleToDraft(savedArticle))
+      setMessage("บันทึกบทความสำเร็จแล้ว")
+    } catch {
+      setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์เพื่อบันทึกบทความได้")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleDeleteArticle = async () => {
+    if (!draft.id || !confirm("ต้องการลบบทความนี้ใช่ไหม? การลบไม่สามารถย้อนกลับได้")) {
+      return
+    }
+
+    setIsSaving(true)
+    setMessage("")
+    setError("")
+    try {
+      const response = await fetch("/api/articles", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: draft.id }),
+      })
+      if (!response.ok) {
+        const result = (await response.json()) as { error?: string }
+        setError(result.error || "ไม่สามารถลบบทความได้")
+        return
+      }
+      setArticles((previous) => previous.filter((article) => article.id !== draft.id))
+      resetForm()
+      setMessage("ลบบทความสำเร็จแล้ว")
+    } catch {
+      setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์เพื่อลบบทความได้")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  return (
+    <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+      <section className="xl:col-span-4 flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-sm font-extrabold text-white">รายการบทความ</h3>
+          <Button
+            type="button"
+            onClick={resetForm}
+            variant="gold"
+            className="text-[10px] font-bold px-3 py-2 flex items-center gap-1.5"
+          >
+            <PlusCircle className="size-3.5" />
+            เพิ่มใหม่
+          </Button>
+        </div>
+
+        <div className="rounded-xl border border-white/[0.08] overflow-hidden bg-[#070F1C]">
+          {isLoading ? (
+            <div className="p-4 text-xs text-slate-400">กำลังโหลดบทความ...</div>
+          ) : articles.length === 0 ? (
+            <div className="p-4 text-xs text-slate-400 leading-relaxed">
+              ยังไม่มีบทความ กด “เพิ่มใหม่” แล้วเริ่มเขียนบทความแรกได้เลย
+            </div>
+          ) : (
+            articles.map((article) => (
+              <button
+                key={article.id}
+                type="button"
+                onClick={() => {
+                  setDraft(articleToDraft(article))
+                  setMessage("")
+                  setError("")
+                }}
+                className={`w-full text-left p-4 border-b border-white/[0.05] last:border-b-0 transition-colors ${
+                  draft.id === article.id ? "bg-accent/10" : "hover:bg-white/[0.04]"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs font-bold text-white line-clamp-1">{article.title}</span>
+                  <span className={`text-[9px] font-bold px-2 py-1 rounded-full ${
+                    article.published ? "bg-green-500/15 text-green-300" : "bg-slate-500/15 text-slate-300"
+                  }`}>
+                    {article.published ? "เผยแพร่" : "ร่าง"}
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-500 mt-1">/{article.slug}</p>
+              </button>
+            ))
+          )}
+        </div>
+      </section>
+
+      <section className="xl:col-span-8 rounded-xl border border-white/[0.08] bg-[#070F1C] p-5 md:p-6 flex flex-col gap-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
+          <div>
+            <h3 className="text-sm font-extrabold text-white">
+              {draft.id ? "แก้ไขบทความ" : "เพิ่มบทความใหม่"}
+            </h3>
+            <p className="text-[10px] text-slate-500 mt-1">
+              แนะนำใส่ title, excerpt, meta description ให้ครบเพื่อ SEO
+            </p>
+          </div>
+          {selectedArticle?.published && (
+            <Link
+              href={`/articles/${selectedArticle.slug}`}
+              target="_blank"
+              className="text-[10px] font-bold text-accent hover:text-white transition-colors"
+            >
+              ดูบทความจริง →
+            </Link>
+          )}
+        </div>
+
+        <AdminInput
+          label="หัวข้อบทความ"
+          value={draft.title}
+          onChange={(value) => {
+            updateDraft("title", value)
+            if (!draft.id && !draft.slug) updateDraft("slug", makeSlug(value))
+          }}
+          placeholder="เช่น 5 วิธีเลือกบริษัทรักษาความปลอดภัย"
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <AdminInput
+            label="Slug URL"
+            value={draft.slug}
+            onChange={(value) => updateDraft("slug", makeSlug(value))}
+            placeholder="security-company-selection"
+          />
+          <AdminInput
+            label="หมวดหมู่"
+            value={draft.category}
+            onChange={(value) => updateDraft("category", value)}
+            placeholder="ข่าวสาร / ความรู้ความปลอดภัย"
+          />
+        </div>
+
+        <AdminTextarea
+          label="คำโปรย / สรุปบทความ"
+          value={draft.excerpt}
+          onChange={(value) => updateDraft("excerpt", value)}
+          rows={3}
+          placeholder="สรุปสั้น ๆ สำหรับหน้า list และ meta description"
+        />
+
+        <AdminTextarea
+          label="เนื้อหาบทความ"
+          value={draft.content}
+          onChange={(value) => updateDraft("content", value)}
+          rows={12}
+          placeholder="เขียนเนื้อหาบทความ แยกย่อหน้าด้วยการเว้นบรรทัด"
+        />
+
+        <AdminInput
+          label="รูปปก (URL)"
+          value={draft.coverImageUrl}
+          onChange={(value) => updateDraft("coverImageUrl", value)}
+          placeholder="/images/patrol-team.jpg หรือ https://..."
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <AdminInput
+            label="SEO Title"
+            value={draft.metaTitle}
+            onChange={(value) => updateDraft("metaTitle", value)}
+            placeholder="ปล่อยว่างได้ ระบบจะใช้หัวข้อบทความ"
+          />
+          <AdminInput
+            label="วันที่เผยแพร่"
+            type="date"
+            value={draft.publishedAt}
+            onChange={(value) => updateDraft("publishedAt", value)}
+          />
+        </div>
+
+        <AdminTextarea
+          label="SEO Description"
+          value={draft.metaDescription}
+          onChange={(value) => updateDraft("metaDescription", value)}
+          rows={3}
+          placeholder="ปล่อยว่างได้ ระบบจะใช้คำโปรย"
+        />
+
+        <label className="flex items-center gap-3 rounded-lg border border-white/[0.08] bg-white/[0.03] p-4 text-xs text-slate-300">
+          <input
+            type="checkbox"
+            checked={draft.published}
+            onChange={(event) => updateDraft("published", event.target.checked)}
+            className="size-4 accent-[#E8C547]"
+          />
+          เผยแพร่บทความบนหน้าเว็บไซต์
+        </label>
+
+        {(message || error) && (
+          <div className={`rounded-lg p-3 text-xs font-semibold ${
+            error ? "bg-red-950/60 border border-red-500/30 text-red-300" : "bg-green-950/60 border border-green-500/30 text-green-300"
+          }`}>
+            {error || message}
+          </div>
+        )}
+
+        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+          <Button
+            type="button"
+            onClick={handleSaveArticle}
+            disabled={isSaving}
+            variant="gold"
+            className="font-extrabold text-xs py-5 flex items-center justify-center gap-2"
+          >
+            <Save className="size-4" />
+            {isSaving ? "กำลังบันทึก..." : "บันทึกบทความ"}
+          </Button>
+          {draft.id && (
+            <Button
+              type="button"
+              onClick={handleDeleteArticle}
+              disabled={isSaving}
+              variant="destructive"
+              className="font-bold text-xs py-5 flex items-center justify-center gap-2"
+            >
+              <Trash2 className="size-4" />
+              ลบบทความ
+            </Button>
+          )}
+        </div>
+      </section>
+    </div>
+  )
+}
+
+function AdminInput({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+  type?: string
+}) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{label}</span>
+      <input
+        type={type}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="w-full bg-[#0A1628] border border-white/[0.08] focus:border-accent rounded-lg p-3 text-xs text-white placeholder:text-slate-600 focus:outline-none transition-all"
+      />
+    </label>
+  )
+}
+
+function AdminTextarea({
+  label,
+  value,
+  onChange,
+  placeholder,
+  rows = 4,
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+  rows?: number
+}) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{label}</span>
+      <textarea
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        rows={rows}
+        placeholder={placeholder}
+        className="w-full bg-[#0A1628] border border-white/[0.08] focus:border-accent rounded-lg p-3 text-xs text-white placeholder:text-slate-600 focus:outline-none transition-all resize-y"
+      />
+    </label>
   )
 }
 

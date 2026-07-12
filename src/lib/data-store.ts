@@ -4,6 +4,22 @@ import defaultTranslations from "@/lib/translations.json"
 
 export type TranslationsDict = typeof defaultTranslations
 
+export type Article = {
+  id: string
+  slug: string
+  title: string
+  excerpt: string
+  content: string
+  category: string
+  coverImageUrl: string
+  metaTitle: string
+  metaDescription: string
+  published: boolean
+  publishedAt: string
+  createdAt: string
+  updatedAt: string
+}
+
 export type ContactSubmission = {
   id: string
   createdAt: string
@@ -31,10 +47,15 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function sanitizeUsingTemplate(value: unknown, template: unknown): unknown {
   if (typeof template === "string") {
+    if (value === undefined) return template
     if (typeof value !== "string" || value.length > 5_000) {
       throw new Error("Invalid translation value")
     }
     return value
+  }
+
+  if ((value === undefined || value === null) && isRecord(template)) {
+    return template
   }
 
   if (!isRecord(value) || !isRecord(template)) {
@@ -43,7 +64,6 @@ function sanitizeUsingTemplate(value: unknown, template: unknown): unknown {
 
   return Object.fromEntries(
     Object.entries(template).map(([key, childTemplate]) => {
-      if (!(key in value)) throw new Error(`Missing translation key: ${key}`)
       return [key, sanitizeUsingTemplate(value[key], childTemplate)]
     })
   )
@@ -86,4 +106,132 @@ export async function recordContactSubmission(submission: ContactSubmission) {
     `${JSON.stringify(submission)}\n`,
     { encoding: "utf8", mode: 0o600 }
   )
+}
+
+const ARTICLE_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+
+function sanitizeString(value: unknown, maxLength: number, fieldName: string) {
+  if (typeof value !== "string") {
+    throw new Error(`Invalid article ${fieldName}`)
+  }
+  const trimmed = value.trim()
+  if (trimmed.length > maxLength) {
+    throw new Error(`Article ${fieldName} is too long`)
+  }
+  return trimmed
+}
+
+function sanitizeOptionalImageUrl(value: unknown) {
+  const imageUrl = sanitizeString(value ?? "", 500, "cover image URL")
+  if (!imageUrl) return ""
+  if (imageUrl.startsWith("/images/")) return imageUrl
+
+  try {
+    const parsed = new URL(imageUrl)
+    if (parsed.protocol === "https:" || parsed.protocol === "http:") return imageUrl
+  } catch {
+    // handled below
+  }
+
+  throw new Error("Article cover image URL must be /images/... or http(s)")
+}
+
+function sanitizeIsoDate(value: unknown, fallback: string) {
+  const candidate = typeof value === "string" && value.trim() ? value.trim() : fallback
+  const parsed = Date.parse(candidate)
+  if (!Number.isFinite(parsed)) {
+    throw new Error("Invalid article date")
+  }
+  return new Date(parsed).toISOString()
+}
+
+export function sanitizeArticle(value: unknown): Article {
+  if (!isRecord(value)) {
+    throw new Error("Invalid article")
+  }
+
+  const now = new Date().toISOString()
+  const id = sanitizeString(value.id ?? "", 80, "id")
+  const slug = sanitizeString(value.slug, 120, "slug").toLowerCase()
+  const title = sanitizeString(value.title, 160, "title")
+  const excerpt = sanitizeString(value.excerpt, 320, "excerpt")
+  const content = sanitizeString(value.content, 30_000, "content")
+  const category = sanitizeString(value.category ?? "ข่าวสาร", 80, "category")
+  const metaTitle = sanitizeString(value.metaTitle ?? title, 180, "meta title")
+  const metaDescription = sanitizeString(value.metaDescription ?? excerpt, 320, "meta description")
+
+  if (!id) throw new Error("Article id is required")
+  if (!ARTICLE_SLUG_PATTERN.test(slug)) throw new Error("Article slug is invalid")
+  if (!title) throw new Error("Article title is required")
+  if (!excerpt) throw new Error("Article excerpt is required")
+  if (!content) throw new Error("Article content is required")
+
+  return {
+    id,
+    slug,
+    title,
+    excerpt,
+    content,
+    category,
+    coverImageUrl: sanitizeOptionalImageUrl(value.coverImageUrl),
+    metaTitle,
+    metaDescription,
+    published: Boolean(value.published),
+    publishedAt: sanitizeIsoDate(value.publishedAt, now),
+    createdAt: sanitizeIsoDate(value.createdAt, now),
+    updatedAt: sanitizeIsoDate(value.updatedAt, now),
+  }
+}
+
+export function sanitizeArticles(value: unknown): Article[] {
+  if (!Array.isArray(value)) {
+    throw new Error("Invalid articles collection")
+  }
+  const articles = value.map(sanitizeArticle)
+  const seenIds = new Set<string>()
+  const seenSlugs = new Set<string>()
+
+  for (const article of articles) {
+    if (seenIds.has(article.id)) throw new Error("Duplicate article id")
+    if (seenSlugs.has(article.slug)) throw new Error("Duplicate article slug")
+    seenIds.add(article.id)
+    seenSlugs.add(article.slug)
+  }
+
+  return articles.sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
+}
+
+export async function readArticles(): Promise<Article[]> {
+  try {
+    const file = await readFile(path.join(getDataDir(), "articles.json"), "utf8")
+    return sanitizeArticles(JSON.parse(file))
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      console.error("Unable to read persisted articles:", error)
+    }
+    return []
+  }
+}
+
+export async function writeArticles(articles: Article[]) {
+  const dataDir = getDataDir()
+  const targetPath = path.join(dataDir, "articles.json")
+  const temporaryPath = `${targetPath}.${process.pid}.tmp`
+
+  await mkdir(dataDir, { recursive: true })
+  await writeFile(temporaryPath, JSON.stringify(sanitizeArticles(articles), null, 2), {
+    encoding: "utf8",
+    mode: 0o600,
+  })
+  await rename(temporaryPath, targetPath)
+}
+
+export async function readPublishedArticles() {
+  const articles = await readArticles()
+  return articles.filter((article) => article.published)
+}
+
+export async function readPublishedArticleBySlug(slug: string) {
+  const articles = await readPublishedArticles()
+  return articles.find((article) => article.slug === slug)
 }
