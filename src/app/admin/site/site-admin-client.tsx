@@ -30,7 +30,18 @@ type TextFieldConfig = {
   rows?: number
 }
 
+type SiteSectionKey = "global" | "home" | "about" | "services" | "pricing" | "contact" | "images"
+
+type TextSectionKey = Exclude<SiteSectionKey, "images">
+
+type SiteSectionConfig = {
+  key: SiteSectionKey
+  title: string
+  description: string
+}
+
 type TextGroupConfig = {
+  section: TextSectionKey
   title: string
   description: string
   fields: TextFieldConfig[]
@@ -42,8 +53,47 @@ type ImageFieldConfig = {
   description: string
 }
 
+const SITE_SECTIONS: SiteSectionConfig[] = [
+  {
+    key: "global",
+    title: "ข้อมูลเว็บ",
+    description: "เมนู ส่วนท้ายเว็บ ข้อมูลติดต่อ และ Hero ของหน้าหลักอื่น ๆ",
+  },
+  {
+    key: "home",
+    title: "หน้าแรก",
+    description: "Banner, บริการบนหน้าแรก, จุดเด่น, กระบวนการ, Gallery และ CTA",
+  },
+  {
+    key: "about",
+    title: "เกี่ยวกับเรา",
+    description: "ภาพรวมบริษัท ขั้นตอน วิสัยทัศน์ พันธกิจ ค่านิยม และ CTA",
+  },
+  {
+    key: "services",
+    title: "บริการ",
+    description: "รายละเอียดบริการ มาตรฐาน Training FAQ และ CTA",
+  },
+  {
+    key: "pricing",
+    title: "ราคา",
+    description: "แนวคิดราคา โครงสร้างต้นทุน และ CTA",
+  },
+  {
+    key: "contact",
+    title: "ติดต่อเรา",
+    description: "ข้อมูลติดต่อ แบบฟอร์ม ข้อความแจ้งเตือน และแผนที่",
+  },
+  {
+    key: "images",
+    title: "รูปภาพ",
+    description: "เปลี่ยนรูป Banner และรูปประกอบแต่ละหน้า",
+  },
+]
+
 const TEXT_GROUPS: TextGroupConfig[] = [
   {
+    section: "global",
     title: "ข้อมูลหลักของเว็บ",
     description: "เมนู ส่วนท้ายเว็บ และข้อมูลติดต่อที่ใช้ซ้ำหลายหน้า",
     fields: [
@@ -74,6 +124,7 @@ const TEXT_GROUPS: TextGroupConfig[] = [
     ],
   },
   {
+    section: "home",
     title: "Banner หน้าแรก",
     description: "ข้อความส่วนแรกที่ผู้ชมเห็นทันที",
     fields: [
@@ -85,7 +136,8 @@ const TEXT_GROUPS: TextGroupConfig[] = [
     ],
   },
   {
-    title: "บริการ",
+    section: "home",
+    title: "บริการบนหน้าแรก",
     description: "กล่องบริการ 3 รายการบนหน้าแรก",
     fields: [
       { label: "ป้าย section", path: "home.servicesTag" },
@@ -100,6 +152,7 @@ const TEXT_GROUPS: TextGroupConfig[] = [
     ],
   },
   {
+    section: "home",
     title: "ทำไมต้องเลือกเรา",
     description: "ข้อความอธิบายจุดต่างของบริษัท",
     fields: [
@@ -119,6 +172,7 @@ const TEXT_GROUPS: TextGroupConfig[] = [
     ],
   },
   {
+    section: "home",
     title: "กระบวนการทำงาน",
     description: "6 เสาหลักมาตรฐานการบริการ",
     fields: [
@@ -139,6 +193,7 @@ const TEXT_GROUPS: TextGroupConfig[] = [
     ],
   },
   {
+    section: "home",
     title: "ภาพการปฏิบัติงาน และ CTA",
     description: "ข้อความส่วนท้ายหน้าแรก",
     fields: [
@@ -151,6 +206,7 @@ const TEXT_GROUPS: TextGroupConfig[] = [
     ],
   },
   {
+    section: "global",
     title: "Hero หน้าสำคัญ",
     description: "หัวข้อด้านบนของหน้าเกี่ยวกับเรา บริการ ราคา และติดต่อเรา",
     fields: [
@@ -169,6 +225,7 @@ const TEXT_GROUPS: TextGroupConfig[] = [
     ],
   },
   {
+    section: "about",
     title: "หน้าเกี่ยวกับเรา",
     description: "ข้อความแนะนำบริษัท ขั้นตอนการทำงาน วิสัยทัศน์ และค่านิยม",
     fields: [
@@ -219,6 +276,7 @@ const TEXT_GROUPS: TextGroupConfig[] = [
     ],
   },
   {
+    section: "services",
     title: "หน้าบริการ",
     description: "รายละเอียดบริการ มาตรฐาน Training FAQ และ CTA",
     fields: [
@@ -290,6 +348,7 @@ const TEXT_GROUPS: TextGroupConfig[] = [
     ],
   },
   {
+    section: "pricing",
     title: "หน้าการเสนอราคา",
     description: "แนวคิดราคา โครงสร้างต้นทุน และ CTA",
     fields: [
@@ -317,6 +376,7 @@ const TEXT_GROUPS: TextGroupConfig[] = [
     ],
   },
   {
+    section: "contact",
     title: "หน้าติดต่อเรา",
     description: "ข้อความในกล่องข้อมูลติดต่อ แบบฟอร์ม และแผนที่",
     fields: [
@@ -413,6 +473,15 @@ const IMAGE_FIELDS: ImageFieldConfig[] = [
   },
 ]
 
+function getSectionFieldCount(sectionKey: SiteSectionKey) {
+  if (sectionKey === "images") return IMAGE_FIELDS.length
+
+  return TEXT_GROUPS.filter((group) => group.section === sectionKey).reduce(
+    (total, group) => total + group.fields.length,
+    0
+  )
+}
+
 function cloneTranslations(source: TranslationsDict): TranslationsDict {
   return JSON.parse(JSON.stringify(source)) as TranslationsDict
 }
@@ -492,12 +561,16 @@ export function SiteAdminShell() {
   const [isSaving, setIsSaving] = React.useState(false)
   const [isUploading, setIsUploading] = React.useState<keyof SiteAssets | "">("")
   const [viewMode, setViewMode] = React.useState<"edit" | "preview">("edit")
+  const [activeSection, setActiveSection] = React.useState<SiteSectionKey>("global")
   const [translations, setTranslations] = React.useState<TranslationsDict>(() =>
     cloneTranslations(defaultTranslations)
   )
   const [assets, setAssets] = React.useState<SiteAssets>(DEFAULT_SITE_ASSETS)
   const [message, setMessage] = React.useState("")
   const [error, setError] = React.useState("")
+  const activeSectionConfig =
+    SITE_SECTIONS.find((section) => section.key === activeSection) ?? SITE_SECTIONS[0]
+  const visibleTextGroups = TEXT_GROUPS.filter((group) => group.section === activeSection)
 
   React.useEffect(() => {
     const previousBodyBackground = document.body.style.backgroundColor
@@ -728,28 +801,52 @@ export function SiteAdminShell() {
             ) : viewMode === "preview" ? (
               <SitePreview translations={translations} assets={assets} />
             ) : (
-              <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_360px]">
-                <div className="flex flex-col gap-6">
-                  {TEXT_GROUPS.map((group) => (
-                    <TextGroupEditor
-                      key={group.title}
-                      group={group}
-                      translations={translations}
-                      onChange={updateTranslation}
-                    />
-                  ))}
-                </div>
-                <div className="flex flex-col gap-4">
-                  {IMAGE_FIELDS.map((field) => (
-                    <ImageFieldEditor
-                      key={field.key}
-                      field={field}
-                      imageUrl={assets[field.key]}
-                      isUploading={isUploading === field.key}
-                      onUpload={(file) => uploadImage(field.key, file)}
-                    />
-                  ))}
-                </div>
+              <div className="flex flex-col gap-6">
+                <SiteSectionSwitcher activeSection={activeSection} onChange={setActiveSection} />
+
+                <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-amber-600">
+                        กำลังแก้ไข
+                      </p>
+                      <h2 className="mt-1 text-xl font-extrabold text-slate-950">
+                        {activeSectionConfig.title}
+                      </h2>
+                      <p className="mt-1 text-sm leading-6 text-slate-500">
+                        {activeSectionConfig.description}
+                      </p>
+                    </div>
+                    <div className="inline-flex w-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-600">
+                      {getSectionFieldCount(activeSection)} รายการ
+                    </div>
+                  </div>
+                </section>
+
+                {activeSection === "images" ? (
+                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+                    {IMAGE_FIELDS.map((field) => (
+                      <ImageFieldEditor
+                        key={field.key}
+                        field={field}
+                        imageUrl={assets[field.key]}
+                        isUploading={isUploading === field.key}
+                        onUpload={(file) => uploadImage(field.key, file)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-6">
+                    {visibleTextGroups.map((group) => (
+                      <TextGroupEditor
+                        key={group.title}
+                        group={group}
+                        translations={translations}
+                        onChange={updateTranslation}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
@@ -844,6 +941,61 @@ function AdminNavLink({
         )}
       </div>
     </Link>
+  )
+}
+
+function SiteSectionSwitcher({
+  activeSection,
+  onChange,
+}: {
+  activeSection: SiteSectionKey
+  onChange: (section: SiteSectionKey) => void
+}) {
+  return (
+    <section className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+      <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="text-base font-extrabold text-slate-950">เลือกหมวดที่ต้องการแก้</h2>
+          <p className="mt-1 text-xs leading-5 text-slate-500">
+            แสดงเฉพาะข้อมูลของหมวดที่เลือก ลดการเลื่อนยาวและแก้ผิดช่องได้ยากขึ้น
+          </p>
+        </div>
+        <p className="text-xs font-bold text-slate-400">Draft / Preview / Publish ใช้ชุดเดิม</p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+        {SITE_SECTIONS.map((section) => {
+          const isActive = section.key === activeSection
+
+          return (
+            <button
+              key={section.key}
+              type="button"
+              onClick={() => onChange(section.key)}
+              className={`rounded-2xl border p-3 text-left transition ${
+                isActive
+                  ? "border-amber-300 bg-amber-50 text-amber-950 shadow-sm"
+                  : "border-slate-200 bg-white text-slate-700 hover:border-amber-200 hover:bg-amber-50/40"
+              }`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-sm font-extrabold">{section.title}</span>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${
+                    isActive ? "bg-amber-200 text-amber-950" : "bg-slate-100 text-slate-500"
+                  }`}
+                >
+                  {getSectionFieldCount(section.key)}
+                </span>
+              </div>
+              <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">
+                {section.description}
+              </p>
+            </button>
+          )
+        })}
+      </div>
+    </section>
   )
 }
 
