@@ -361,8 +361,8 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h4 className="text-sm font-extrabold text-white">{t("contact.mapCardTitle")}</h4>
-                      <p className="mt-1 text-xs leading-5 text-slate-300">
-                        225 ถนนสุขุมวิท 105 แขวงบางนาใต้ เขตบางนา กรุงเทพมหานคร
+                      <p className="mt-1 text-xs leading-5 text-slate-300 whitespace-pre-line">
+                        {t("contact.hqAddress")}
                       </p>
                     </div>
                   </div>

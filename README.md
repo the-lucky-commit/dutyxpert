@@ -43,6 +43,8 @@ Notes:
 - `DUTYXPERT_DATA_DIR` should point outside the app directory on persistent servers, for example `/home/dutyxcnk/dutyxpert-data`.
 - On Vercel, use `/tmp/dutyxpert-data`; this is writable but ephemeral, so do not treat it as permanent storage.
 - Admin-created articles are stored in `articles.json` under `DUTYXPERT_DATA_DIR`. Back up this directory before server moves or redeploy workflows that replace hosting storage.
+- Admin-edited site text and published site image references are stored in `translations.json`, `site-draft.json`, and `site-assets.json` under `DUTYXPERT_DATA_DIR`.
+- Uploaded images are saved under `public/uploads/articles` and `public/uploads/site`. Back up these folders before server moves or manual clean deploys.
 
 ## Optional email notification
 
@@ -115,5 +117,7 @@ Then in cPanel Git Version Control:
 - Confirm `/login` does not expose any mock credentials.
 - Confirm `/admin` redirects without a valid session and loads after login.
 - Confirm `/admin` article create/edit/publish writes to persistent `DUTYXPERT_DATA_DIR`.
+- Confirm `/admin/site` draft/preview/publish updates public page text and main page images.
+- Confirm `public/uploads/articles` and `public/uploads/site` are preserved before deploys that replace the app directory.
 - Configure SMTP before expecting contact-form email notifications.
 - After domain migration, run/verify AutoSSL on hosting.

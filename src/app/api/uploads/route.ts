@@ -15,6 +15,10 @@ async function requireAdminSession() {
   return isValidSessionToken(token)
 }
 
+function getUploadScope(value: unknown) {
+  return value === "site" ? "site" : "articles"
+}
+
 function parseBase64Image(dataUrl: unknown) {
   if (typeof dataUrl !== "string") {
     throw new Error("Invalid image")
@@ -43,16 +47,17 @@ export async function POST(request: Request) {
   }
 
   try {
-    const body = (await request.json()) as { image?: unknown }
+    const body = (await request.json()) as { image?: unknown; scope?: unknown }
     const { buffer, extension } = parseBase64Image(body.image)
-    const uploadDir = path.join(process.cwd(), "public", "uploads", "articles")
+    const scope = getUploadScope(body.scope)
+    const uploadDir = path.join(process.cwd(), "public", "uploads", scope)
     const filename = `${randomUUID()}.${extension}`
     const targetPath = path.join(uploadDir, filename)
 
     await mkdir(uploadDir, { recursive: true })
     await writeFile(targetPath, buffer, { mode: 0o644 })
 
-    return NextResponse.json({ url: `/uploads/articles/${filename}` })
+    return NextResponse.json({ url: `/uploads/${scope}/${filename}` })
   } catch (error) {
     console.error("Unable to upload article image:", error)
     return NextResponse.json({ error: "ไม่สามารถอัปโหลดรูปได้" }, { status: 400 })

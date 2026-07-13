@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { motion } from "framer-motion"
 import {
   Shield,
@@ -16,10 +15,13 @@ import {
   ArrowRight
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ManagedSiteImage } from "@/components/managed-site-image"
 import { useLanguage } from "@/context/language-context"
+import { useSiteAssets } from "@/lib/use-site-assets"
 
 export default function ServicesPage() {
   const { t } = useLanguage()
+  const siteAssets = useSiteAssets()
 
   const serviceItems = [
     {
@@ -27,7 +29,7 @@ export default function ServicesPage() {
       title: t("services.service1Title"),
       titleTh: t("services.service1TitleTh"),
       icon: ShieldCheck,
-      imageUrl: "/images/training-team.jpg",
+      imageUrl: siteAssets.servicesGuardImage,
       description: t("services.service1Desc"),
       standards: [
         t("services.service1Std1"),
@@ -42,7 +44,7 @@ export default function ServicesPage() {
       title: t("services.service2Title"),
       titleTh: t("services.service2TitleTh"),
       icon: Clock,
-      imageUrl: "/images/patrol-team.jpg",
+      imageUrl: siteAssets.servicesPatrolImage,
       description: t("services.service2Desc"),
       standards: [
         t("services.service2Std1"),
@@ -57,7 +59,7 @@ export default function ServicesPage() {
       title: t("services.service3Title"),
       titleTh: t("services.service3TitleTh"),
       icon: FileText,
-      imageUrl: "/images/security-guard.jpg",
+      imageUrl: siteAssets.servicesConsultingImage,
       description: t("services.service3Desc"),
       standards: [
         t("services.service3Std1"),
@@ -179,10 +181,9 @@ export default function ServicesPage() {
                   className={`lg:col-span-5 ${!isEven ? "lg:order-1" : ""}`}
                 >
                   <div className={`relative aspect-[4/3] w-full rounded-2xl overflow-hidden shadow-2xl border ${isLight ? "border-slate-200" : "border-white/10"}`}>
-                    <Image 
+                    <ManagedSiteImage
                       src={service.imageUrl}
                       alt={service.title}
-                      fill
                       className="object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent" />
@@ -359,7 +360,7 @@ export default function ServicesPage() {
                 <ArrowRight className="size-5 ml-1.5" />
               </Button>
             </Link>
-            <a href="tel:0809387829" className="w-full sm:w-auto">
+            <a href={`tel:${t("navbar.phone").replace(/-/g, "")}`} className="w-full sm:w-auto">
               <Button variant="outline" size="lg" className="w-full sm:w-auto text-base text-white border-white/40 hover:bg-white/10 py-6 px-8 rounded-md font-semibold">
                 {t("services.ctaBtnCall")}
               </Button>

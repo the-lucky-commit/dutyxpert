@@ -2,11 +2,12 @@
 
 import * as React from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { motion } from "framer-motion"
 import { ShieldCheck, ArrowRight, DollarSign, Calculator, Percent } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ManagedSiteImage } from "@/components/managed-site-image"
 import { useLanguage } from "@/context/language-context"
+import { useSiteAssets } from "@/lib/use-site-assets"
 
 // Animation Configuration
 const fadeInUp = {
@@ -18,6 +19,7 @@ const fadeInUp = {
 
 export default function PricingPage() {
   const { t } = useLanguage()
+  const siteAssets = useSiteAssets()
 
   const costItems = [
     {
@@ -86,10 +88,9 @@ export default function PricingPage() {
           {/* รูปภาพ รปภ. ดิวตี้ เอคซ์เพิร์ท */}
           <motion.div {...fadeInUp} className="lg:col-span-5">
             <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden shadow-xl border border-slate-200">
-              <Image
-                src="/images/pricing-security.jpg"
+              <ManagedSiteImage
+                src={siteAssets.pricingConceptImage}
                 alt="การลงพื้นที่ปฏิบัติงานและวางแผนราคาของ ดิวตี้ เอคซ์เพิร์ท"
-                fill
                 sizes="(max-width: 1024px) 100vw, 40vw"
                 className="object-cover"
               />

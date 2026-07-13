@@ -8,16 +8,32 @@ import {
   ShieldCheck,
   Clock,
   ChevronRight,
+  CalendarDays,
   Award,
   Eye,
   FileText,
   UserCheck,
   CheckCircle,
   ArrowRight,
+  Newspaper,
   Phone,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ManagedSiteImage } from "@/components/managed-site-image"
 import { useLanguage } from "@/context/language-context"
+import type { Language } from "@/lib/language"
+import { useSiteAssets } from "@/lib/use-site-assets"
+
+type HomeArticle = {
+  id: string
+  slug: string
+  title: string
+  excerpt: string
+  category: string
+  coverImageUrl: string
+  publishedAt: string
+  language: Language
+}
 
 /* ─── Animation Presets ─── */
 const fadeIn = {
@@ -38,9 +54,64 @@ const childFade = {
   transition: { duration: 0.5 },
 }
 
+function formatArticleDate(date: string, language: Language) {
+  return new Intl.DateTimeFormat(language === "en" ? "en-US" : "th-TH", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(new Date(date))
+}
+
+function ArticleCardImage({ src, alt }: { src: string; alt: string }) {
+  if (!src) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary to-secondary">
+        <Newspaper className="size-12 text-accent" />
+      </div>
+    )
+  }
+
+  if (/^https?:\/\//.test(src) || src.startsWith("/uploads/articles/")) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+    )
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      sizes="(max-width: 768px) 100vw, 33vw"
+      className="object-cover transition-transform duration-500 group-hover:scale-105"
+    />
+  )
+}
+
 /* ─── Page ─── */
 export default function Home() {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
+  const [homeArticles, setHomeArticles] = React.useState<HomeArticle[]>([])
+  const siteAssets = useSiteAssets()
+
+  React.useEffect(() => {
+    const controller = new AbortController()
+
+    fetch(`/api/public/articles?language=${language}`, { signal: controller.signal })
+      .then((response) => (response.ok ? response.json() : []))
+      .then((articles: HomeArticle[]) => setHomeArticles(Array.isArray(articles) ? articles : []))
+      .catch((error: unknown) => {
+        if ((error as Error).name !== "AbortError") setHomeArticles([])
+      })
+
+    return () => controller.abort()
+  }, [language])
 
   return (
     <div className="flex flex-col">
@@ -48,10 +119,9 @@ export default function Home() {
       {/* ━━━ 1. HERO ━━━ */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden -mt-20 lg:-mt-[104px]">
         {/* Background Image */}
-        <Image
-          src="/images/patrol-team.jpg"
+        <ManagedSiteImage
+          src={siteAssets.homeHeroImage}
           alt="เจ้าหน้าที่สายตรวจ ดิวตี้ เอคซ์เพิร์ท"
-          fill
           priority
           className="object-cover object-center"
         />
@@ -163,11 +233,9 @@ export default function Home() {
           {/* Image Side */}
           <motion.div {...fadeIn} className="relative">
             <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden">
-              <Image
-                src="/images/security-guard.jpg"
+              <ManagedSiteImage
+                src={siteAssets.homeWhyImage}
                 alt="การปฏิบัติงานจริงของ Duty Xpert"
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent" />
@@ -246,6 +314,71 @@ export default function Home() {
         </div>
       </section>
 
+      {homeArticles.length > 0 && (
+        <section className="py-20 md:py-28 bg-white">
+          <div className="max-w-6xl mx-auto px-6">
+            <motion.div {...fadeIn} className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div>
+                <span className="text-xs font-bold text-primary uppercase tracking-widest">
+                  {language === "en" ? "Articles & News" : "บทความและข่าวสาร"}
+                </span>
+                <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mt-3 tracking-tight">
+                  {language === "en" ? "Latest security insights" : "บทความและข่าวสารล่าสุด"}
+                </h2>
+                <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
+                  {language === "en"
+                    ? "Updates and practical security knowledge from Duty Xpert."
+                    : "อัปเดตข่าวสารและความรู้ด้านการรักษาความปลอดภัยจากดิวตี้ เอคซ์เพิร์ท"}
+                </p>
+              </div>
+              <Link
+                href="/articles"
+                className="inline-flex items-center gap-1.5 text-sm font-extrabold text-primary transition hover:text-accent"
+              >
+                {language === "en" ? "View all" : "ดูทั้งหมด"}
+                <ChevronRight className="size-4" />
+              </Link>
+            </motion.div>
+
+            <motion.div {...stagger} className="grid grid-cols-1 gap-6 md:grid-cols-3">
+              {homeArticles.map((article) => (
+                <motion.article key={article.id} {...childFade}>
+                  <Link
+                    href={`/articles/${article.slug}`}
+                    className="group block h-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  >
+                    <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
+                      <ArticleCardImage src={article.coverImageUrl} alt={article.title} />
+                    </div>
+                    <div className="flex min-h-[220px] flex-col gap-4 p-6">
+                      <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold text-slate-500">
+                        <span className="rounded-full bg-primary/5 px-2.5 py-1 text-primary">
+                          {article.category}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <CalendarDays className="size-3.5" />
+                          {formatArticleDate(article.publishedAt, article.language)}
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-extrabold leading-snug text-slate-900 transition-colors group-hover:text-primary">
+                        {article.title}
+                      </h3>
+                      <p className="line-clamp-3 text-sm leading-relaxed text-slate-600">
+                        {article.excerpt}
+                      </p>
+                      <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-bold text-primary transition-colors group-hover:text-accent">
+                        {language === "en" ? "Read more" : "อ่านต่อ"}
+                        <ChevronRight className="size-4 transition-transform group-hover:translate-x-1" />
+                      </span>
+                    </div>
+                  </Link>
+                </motion.article>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+      )}
+
       {/* ━━━ 5. GALLERY ━━━ */}
       <section className="py-20 md:py-28 bg-primary">
         <div className="max-w-6xl mx-auto px-6">
@@ -258,11 +391,9 @@ export default function Home() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <motion.div {...fadeIn} className="relative aspect-[16/10] rounded-2xl overflow-hidden group">
-              <Image
-                src="/images/patrol-team.jpg"
+              <ManagedSiteImage
+                src={siteAssets.homeGalleryImage1}
                 alt="สายตรวจ รปภ. ดิวตี้ เอคซ์เพิร์ท"
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
@@ -272,11 +403,9 @@ export default function Home() {
             </motion.div>
 
             <motion.div {...fadeIn} className="relative aspect-[16/10] rounded-2xl overflow-hidden group">
-              <Image
-                src="/images/training-team.jpg"
+              <ManagedSiteImage
+                src={siteAssets.homeGalleryImage2}
                 alt="เจ้าหน้าที่ดิวตี้ เอคซ์เพิร์ท ปฏิบัติหน้าที่"
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />

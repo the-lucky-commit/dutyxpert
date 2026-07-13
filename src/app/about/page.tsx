@@ -6,7 +6,9 @@ import Image from "next/image"
 import { motion } from "framer-motion"
 import { ShieldCheck, Award, CheckCircle, ChevronRight, Target, Eye, Building } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ManagedSiteImage } from "@/components/managed-site-image"
 import { useLanguage } from "@/context/language-context"
+import { useSiteAssets } from "@/lib/use-site-assets"
 
 // Animation Configuration
 const fadeInUp = {
@@ -18,6 +20,7 @@ const fadeInUp = {
 
 export default function AboutPage() {
   const { t } = useLanguage()
+  const siteAssets = useSiteAssets()
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -82,10 +85,9 @@ export default function AboutPage() {
           {/* รูปภาพจริงของ รปภ. ดิวตี้ เอคซ์เพิร์ท */}
           <motion.div {...fadeInUp} className="lg:col-span-5 relative">
             <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden shadow-xl border border-slate-200">
-              <Image
-                src="/images/about-team.jpg"
+              <ManagedSiteImage
+                src={siteAssets.aboutOverviewImage}
                 alt="พนักงานรักษาความปลอดภัย บริษัท รักษาความปลอดภัย ดิวตี้ เอคซ์เพิร์ท จำกัด"
-                fill
                 sizes="(max-width: 1024px) 100vw, 40vw"
                 className="object-cover"
               />
