@@ -71,7 +71,7 @@ function formatDate(date: string, language: Language) {
 }
 
 function ArticleCoverImage({ src, alt }: { src: string; alt: string }) {
-  if (/^https?:\/\//.test(src)) {
+  if (/^https?:\/\//.test(src) || src.startsWith("/uploads/articles/")) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
