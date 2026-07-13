@@ -720,10 +720,14 @@ function ArticleManager({
           <div className="mt-6 flex flex-col gap-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <label className="flex flex-col gap-2">
-                <span className="text-xs font-extrabold text-slate-700">ประเภท</span>
+                <span className="flex items-center gap-1 text-xs font-extrabold text-slate-700">
+                  ประเภท
+                  <RequiredMark />
+                </span>
                 <select
                   value={draft.category}
                   onChange={(event) => updateDraft("category", event.target.value as ArticleCategory)}
+                  required
                   className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-950 shadow-sm outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
                 >
                   {CATEGORY_OPTIONS.map((option) => (
@@ -738,6 +742,7 @@ function ArticleManager({
                 type="date"
                 value={draft.publishedAt}
                 onChange={(value) => updateDraft("publishedAt", value)}
+                required
               />
             </div>
 
@@ -895,6 +900,7 @@ function LanguageFields({
           value={value.title}
           onChange={(nextValue) => onChange("title", nextValue)}
           placeholder={title === "ภาษาไทย" ? "เช่น 5 วิธีเลือกบริษัทรักษาความปลอดภัย" : "e.g. 5 tips for choosing a security company"}
+          required
         />
         <AdminTextarea
           label="สรุปสั้น ๆ"
@@ -902,6 +908,7 @@ function LanguageFields({
           onChange={(nextValue) => onChange("summary", nextValue)}
           rows={3}
           placeholder={title === "ภาษาไทย" ? "เขียนสั้น ๆ ว่าเนื้อหานี้เกี่ยวกับอะไร" : "Briefly describe what this article is about."}
+          required
         />
         <AdminTextarea
           label="เนื้อหา"
@@ -909,6 +916,7 @@ function LanguageFields({
           onChange={(nextValue) => onChange("content", nextValue)}
           rows={12}
           placeholder={title === "ภาษาไทย" ? "เขียนเนื้อหา แยกย่อหน้าด้วยการเว้นบรรทัด" : "Write the content. Use blank lines between paragraphs."}
+          required
         />
       </div>
     </div>
@@ -984,6 +992,10 @@ function ArticleLanguagePreview({
   )
 }
 
+function RequiredMark() {
+  return <span className="text-red-500" aria-hidden="true">*</span>
+}
+
 function AdminInput({
   label,
   value,
@@ -991,6 +1003,7 @@ function AdminInput({
   placeholder,
   helpText,
   type = "text",
+  required = false,
 }: {
   label: string
   value: string
@@ -998,15 +1011,20 @@ function AdminInput({
   placeholder?: string
   helpText?: string
   type?: string
+  required?: boolean
 }) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="text-xs font-extrabold text-slate-700">{label}</span>
+      <span className="flex items-center gap-1 text-xs font-extrabold text-slate-700">
+        {label}
+        {required && <RequiredMark />}
+      </span>
       <input
         type={type}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
+        required={required}
         className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-950 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
       />
       {helpText && <span className="text-xs leading-5 text-slate-500">{helpText}</span>}
@@ -1020,21 +1038,27 @@ function AdminTextarea({
   onChange,
   placeholder,
   rows = 4,
+  required = false,
 }: {
   label: string
   value: string
   onChange: (value: string) => void
   placeholder?: string
   rows?: number
+  required?: boolean
 }) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="text-xs font-extrabold text-slate-700">{label}</span>
+      <span className="flex items-center gap-1 text-xs font-extrabold text-slate-700">
+        {label}
+        {required && <RequiredMark />}
+      </span>
       <textarea
         value={value}
         onChange={(event) => onChange(event.target.value)}
         rows={rows}
         placeholder={placeholder}
+        required={required}
         className="w-full rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-950 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
       />
     </label>

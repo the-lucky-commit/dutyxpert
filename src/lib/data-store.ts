@@ -127,7 +127,9 @@ function sanitizeString(value: unknown, maxLength: number, fieldName: string) {
 function sanitizeOptionalImageUrl(value: unknown) {
   const imageUrl = sanitizeString(value ?? "", 500, "cover image URL")
   if (!imageUrl) return ""
-  if (imageUrl.startsWith("/images/")) return imageUrl
+  if (imageUrl.startsWith("/images/") || imageUrl.startsWith("/uploads/articles/")) {
+    return imageUrl
+  }
 
   try {
     const parsed = new URL(imageUrl)
@@ -136,7 +138,7 @@ function sanitizeOptionalImageUrl(value: unknown) {
     // handled below
   }
 
-  throw new Error("Article cover image URL must be /images/... or http(s)")
+  throw new Error("Article cover image URL must be /images/..., /uploads/articles/..., or http(s)")
 }
 
 function sanitizeIsoDate(value: unknown, fallback: string) {
