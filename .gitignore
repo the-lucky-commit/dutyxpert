@@ -23,6 +23,7 @@
 /tmp
 /docs
 /output
+/public/uploads/
 stderr.log
 
 # misc
