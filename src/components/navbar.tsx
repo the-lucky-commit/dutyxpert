@@ -114,12 +114,12 @@ export default function Navbar() {
                 priority
               />
             </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-[#E2E8F0] text-sm md:text-base leading-none tracking-wide">
-                {t("navbar.brand")}
+            <div className="flex flex-col gap-1">
+              <span className="font-extrabold text-[#E2E8F0] text-base md:text-lg leading-none tracking-[0.06em] uppercase">
+                DUTY XPERT
               </span>
-              <span className="text-[8px] md:text-[9px] text-[#E8C547] tracking-[0.2em] font-semibold uppercase mt-0.5">
-                {t("navbar.subBrand")}
+              <span className="font-medium text-[#E8C547] text-base md:text-lg leading-none tracking-[0.01em]">
+                ดิวตี้ เอคซ์เพิร์ท
               </span>
             </div>
           </Link>
