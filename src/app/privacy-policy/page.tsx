@@ -1,84 +1,38 @@
 import type { Metadata } from "next"
+import { getRequestLanguage } from "@/lib/server-language"
+import { PrivacyPolicyContent } from "./privacy-policy-content"
 
-export const metadata: Metadata = {
-  title: "นโยบายความเป็นส่วนตัว | Duty Xpert Security",
-  description:
-    "นโยบายการเก็บ ใช้ ดูแล และคุ้มครองข้อมูลส่วนบุคคลบนเว็บไซต์ Duty Xpert Security",
-  alternates: { canonical: "/privacy-policy" },
+const privacyMetadata = {
+  th: {
+    title: "นโยบายความเป็นส่วนตัว | Duty Xpert Security",
+    description:
+      "นโยบายการเก็บ ใช้ ดูแล และคุ้มครองข้อมูลส่วนบุคคลบนเว็บไซต์ Duty Xpert Security",
+  },
+  en: {
+    title: "Privacy Policy | Duty Xpert Security",
+    description:
+      "How Duty Xpert Security collects, uses, protects, and manages personal data on the website.",
+  },
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const language = await getRequestLanguage()
+  const copy = privacyMetadata[language]
+
+  return {
+    title: copy.title,
+    description: copy.description,
+    alternates: { canonical: "/privacy-policy" },
+    openGraph: {
+      title: copy.title,
+      description: copy.description,
+      url: "https://dutyxpert.com/privacy-policy",
+      type: "website",
+      locale: language === "en" ? "en_US" : "th_TH",
+    },
+  }
 }
 
 export default function PrivacyPolicyPage() {
-  return (
-    <article className="bg-white text-slate-700 py-20 md:py-28">
-      <div className="max-w-3xl mx-auto px-6">
-        <p className="text-xs font-bold uppercase tracking-widest text-primary">Privacy Policy</p>
-        <h1 className="mt-3 text-3xl md:text-4xl font-extrabold text-slate-900">นโยบายความเป็นส่วนตัว</h1>
-        <p className="mt-6 leading-7">
-          บริษัท รักษาความปลอดภัย ดิวตี้ เอคซ์เพิร์ท จำกัด ให้ความสำคัญกับการคุ้มครองข้อมูลส่วนบุคคลของผู้ใช้งานเว็บไซต์ ผู้ติดต่อขอข้อมูลบริการ และผู้ดูแลระบบที่ได้รับสิทธิ์ใช้งานระบบจัดการเนื้อหา
-          นโยบายนี้อธิบายข้อมูลที่เว็บไซต์เก็บ ใช้ เปิดเผย เก็บรักษา และมาตรการดูแลข้อมูลที่เกี่ยวข้องกับการใช้งานเว็บไซต์นี้
-        </p>
-
-        <h2 className="mt-10 text-xl font-bold text-slate-900">ข้อมูลที่เว็บไซต์อาจเก็บ</h2>
-        <ul className="mt-3 list-disc space-y-3 pl-6 leading-7">
-          <li>
-            <span className="font-semibold text-slate-900">ข้อมูลจากแบบฟอร์มติดต่อ:</span> ชื่อผู้ติดต่อ ชื่อบริษัทหรือหน่วยงาน อีเมล เบอร์โทรศัพท์ ประเภทสถานที่ หัวข้อที่ต้องการติดต่อ รายละเอียดความต้องการ วันที่และเวลาที่ส่งข้อมูล และหมายเลข IP ที่เกี่ยวข้องกับการส่งแบบฟอร์ม
-          </li>
-          <li>
-            <span className="font-semibold text-slate-900">ข้อมูลจากระบบจัดการเนื้อหา:</span> ข้อมูลบทความ ข่าวสาร ข้อความหน้าเว็บ รูปภาพที่อัปโหลด สถานะร่าง/เผยแพร่ วันที่สร้าง วันที่แก้ไข และข้อมูลที่ผู้ดูแลระบบกรอกผ่านระบบ
-          </li>
-          <li>
-            <span className="font-semibold text-slate-900">ข้อมูลทางเทคนิค:</span> ข้อมูลที่จำเป็นต่อการรักษาความปลอดภัย การจำกัดการส่งแบบฟอร์มถี่เกินไป การตรวจสอบข้อผิดพลาด และการให้เว็บไซต์ทำงานได้ตามปกติ
-          </li>
-          <li>
-            <span className="font-semibold text-slate-900">คุกกี้สำหรับผู้ดูแลระบบ:</span> เว็บไซต์ใช้คุกกี้ session สำหรับการเข้าสู่ระบบผู้ดูแลระบบเท่านั้น โดยตั้งค่าเป็น HTTP-only, secure เมื่อใช้งานบน production และมีอายุจำกัดตามระบบ
-          </li>
-        </ul>
-
-        <h2 className="mt-10 text-xl font-bold text-slate-900">วัตถุประสงค์ในการใช้ข้อมูล</h2>
-        <ul className="mt-3 list-disc space-y-3 pl-6 leading-7">
-          <li>ติดต่อกลับผู้ที่ส่งแบบฟอร์ม ขอข้อมูลเพิ่มเติม นัดหมายสำรวจพื้นที่ หรือดำเนินการตามคำขอที่ผู้ใช้งานส่งเข้ามา</li>
-          <li>บันทึกและแจ้งเตือนคำขอติดต่อไปยังทีมงานที่รับผิดชอบผ่านระบบอีเมลของบริษัท เมื่อระบบอีเมลถูกตั้งค่าไว้</li>
-          <li>จัดการบทความ ข่าวสาร ข้อความหน้าเว็บ และรูปภาพที่แสดงบนเว็บไซต์</li>
-          <li>ตรวจสอบความถูกต้องของการเข้าสู่ระบบผู้ดูแลระบบ ป้องกันการใช้งานโดยไม่ได้รับอนุญาต และลดความเสี่ยงจาก spam หรือ abuse</li>
-          <li>ปรับปรุงความเสถียร ความปลอดภัย และประสบการณ์ใช้งานเว็บไซต์</li>
-        </ul>
-
-        <h2 className="mt-10 text-xl font-bold text-slate-900">การเก็บรักษาและเปิดเผยข้อมูล</h2>
-        <p className="mt-3 leading-7">
-          ข้อมูลจะถูกเก็บไว้เท่าที่จำเป็นต่อวัตถุประสงค์ในการติดต่อกลับ การบริหารเว็บไซต์ การตรวจสอบย้อนหลัง และข้อกำหนดทางกฎหมายที่เกี่ยวข้อง บริษัทไม่จำหน่าย แลกเปลี่ยน หรือให้เช่าข้อมูลส่วนบุคคลแก่บุคคลภายนอก
-          การเปิดเผยข้อมูลอาจเกิดขึ้นเฉพาะกรณีที่จำเป็น เช่น ผู้ให้บริการ hosting, ระบบอีเมล, ผู้ดูแลระบบที่ได้รับมอบหมาย, ที่ปรึกษาหรือผู้ให้บริการที่เกี่ยวข้องกับการดูแลระบบ หรือเมื่อมีกฎหมาย คำสั่งหน่วยงานรัฐ หรือกระบวนการทางกฎหมายกำหนด
-        </p>
-
-        <h2 className="mt-10 text-xl font-bold text-slate-900">รูปภาพและเนื้อหาที่ผู้ดูแลระบบอัปโหลด</h2>
-        <p className="mt-3 leading-7">
-          รูปภาพที่ผู้ดูแลระบบอัปโหลดผ่านระบบจัดการเนื้อหาอาจถูกย่อขนาดและบันทึกไว้บนพื้นที่จัดเก็บของเว็บไซต์เพื่อนำไปแสดงต่อสาธารณะ ผู้ดูแลระบบของบริษัทมีหน้าที่ตรวจสอบว่าไฟล์ รูปภาพ ข้อความ และข้อมูลที่เผยแพร่ไม่มีข้อมูลส่วนบุคคลหรือข้อมูลอ่อนไหวเกินความจำเป็น
-          และมีสิทธิ์ใช้งานหรือได้รับอนุญาตให้เผยแพร่โดยถูกต้อง
-        </p>
-
-        <h2 className="mt-10 text-xl font-bold text-slate-900">มาตรการดูแลความปลอดภัย</h2>
-        <p className="mt-3 leading-7">
-          เว็บไซต์ใช้มาตรการตามสมควรเพื่อช่วยลดความเสี่ยง เช่น การจำกัดขนาดข้อมูลที่ส่งเข้า API การตรวจรูปแบบอีเมล การจำกัดจำนวนครั้งในการส่งแบบฟอร์มหรือเข้าสู่ระบบ การใช้คุกกี้แบบ HTTP-only สำหรับ session ผู้ดูแลระบบ
-          และการบันทึกไฟล์ข้อมูลบางประเภทด้วยสิทธิ์การเข้าถึงที่จำกัด อย่างไรก็ตาม ไม่มีระบบออนไลน์ใดสามารถรับประกันความปลอดภัยได้อย่างสมบูรณ์ ผู้ใช้งานและผู้ดูแลระบบควรหลีกเลี่ยงการส่งข้อมูลอ่อนไหวที่ไม่จำเป็นผ่านเว็บไซต์
-        </p>
-
-        <h2 className="mt-10 text-xl font-bold text-slate-900">การเชื่อมโยงไปยังบริการภายนอก</h2>
-        <p className="mt-3 leading-7">
-          เว็บไซต์อาจมีลิงก์ไปยังบริการภายนอก เช่น Google Maps, อีเมล, เบอร์โทรศัพท์ หรือเว็บไซต์อื่น ๆ เมื่่อผู้ใช้งานออกจากเว็บไซต์นี้ การเก็บ ใช้ หรือประมวลผลข้อมูลจะอยู่ภายใต้นโยบายของผู้ให้บริการภายนอกนั้น ๆ
-        </p>
-
-        <h2 className="mt-10 text-xl font-bold text-slate-900">สิทธิของเจ้าของข้อมูล</h2>
-        <p className="mt-3 leading-7">
-          เจ้าของข้อมูลสามารถติดต่อบริษัทเพื่อขอเข้าถึง แก้ไข ลบ จำกัดหรือคัดค้านการใช้ข้อมูลส่วนบุคคล ขอถอนความยินยอมในกรณีที่ใช้ความยินยอมเป็นฐาน หรือสอบถามรายละเอียดการใช้ข้อมูลได้ตามกฎหมายคุ้มครองข้อมูลส่วนบุคคลที่เกี่ยวข้อง
-          การดำเนินการบางกรณีอาจต้องตรวจสอบตัวตนของผู้ร้องขอและอาจมีข้อจำกัดตามกฎหมายหรือภาระหน้าที่ที่บริษัทจำเป็นต้องปฏิบัติ
-        </p>
-
-        <h2 className="mt-10 text-xl font-bold text-slate-900">ช่องทางติดต่อ</h2>
-        <p className="mt-3 leading-7">
-          หากมีคำถามเกี่ยวกับนโยบายนี้หรือการใช้ข้อมูลส่วนบุคคล สามารถติดต่อได้ที่ info@dutyxpert.com หรือ 080-938-7829
-        </p>
-
-        <p className="mt-10 text-sm text-slate-500">ปรับปรุงล่าสุด: 13 กรกฎาคม 2569</p>
-      </div>
-    </article>
-  )
+  return <PrivacyPolicyContent />
 }
