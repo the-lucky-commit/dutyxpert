@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
   AlertCircle,
+  BookOpen,
   CheckCircle,
   ExternalLink,
   FilePenLine,
@@ -57,7 +58,7 @@ const SITE_SECTIONS: SiteSectionConfig[] = [
   {
     key: "global",
     title: "ข้อมูลเว็บ",
-    description: "เมนู ส่วนท้ายเว็บ ข้อมูลติดต่อ และ Hero ของหน้าหลักอื่น ๆ",
+    description: "เมนู ส่วนท้ายเว็บ ข้อมูลติดต่อ และ Hero ของหน้าสำคัญบางหน้า",
   },
   {
     key: "home",
@@ -208,7 +209,7 @@ const TEXT_GROUPS: TextGroupConfig[] = [
   {
     section: "global",
     title: "Hero หน้าสำคัญ",
-    description: "หัวข้อด้านบนของหน้าเกี่ยวกับเรา บริการ ราคา และติดต่อเรา",
+    description: "หัวข้อด้านบนของหน้าเกี่ยวกับเรา บริการ และติดต่อเรา",
     fields: [
       { label: "เกี่ยวกับเรา - ป้ายสั้น", path: "about.heroTag" },
       { label: "เกี่ยวกับเรา - หัวข้อ", path: "about.heroTitle" },
@@ -216,9 +217,6 @@ const TEXT_GROUPS: TextGroupConfig[] = [
       { label: "บริการ - ป้ายสั้น", path: "services.heroTag" },
       { label: "บริการ - หัวข้อ", path: "services.heroTitle" },
       { label: "บริการ - คำอธิบาย", path: "services.heroDesc", rows: 3 },
-      { label: "ราคา - ป้ายสั้น", path: "pricing.heroTag" },
-      { label: "ราคา - หัวข้อ", path: "pricing.heroTitle" },
-      { label: "ราคา - คำอธิบาย", path: "pricing.heroDesc", rows: 3 },
       { label: "ติดต่อเรา - ป้ายสั้น", path: "contact.heroTag" },
       { label: "ติดต่อเรา - หัวข้อ", path: "contact.heroTitle" },
       { label: "ติดต่อเรา - คำอธิบาย", path: "contact.heroDesc", rows: 3 },
@@ -352,6 +350,9 @@ const TEXT_GROUPS: TextGroupConfig[] = [
     title: "หน้าการเสนอราคา",
     description: "แนวคิดราคา โครงสร้างต้นทุน และ CTA",
     fields: [
+      { label: "Hero - ป้ายสั้น", path: "pricing.heroTag" },
+      { label: "Hero - หัวข้อ", path: "pricing.heroTitle" },
+      { label: "Hero - คำอธิบาย", path: "pricing.heroDesc", rows: 3 },
       { label: "ป้ายแนวคิด", path: "pricing.conceptTag" },
       { label: "หัวข้อแนวคิด", path: "pricing.conceptTitle" },
       { label: "ย่อหน้า 1", path: "pricing.conceptParagraph1", rows: 3 },
@@ -486,6 +487,19 @@ function cloneTranslations(source: TranslationsDict): TranslationsDict {
   return JSON.parse(JSON.stringify(source)) as TranslationsDict
 }
 
+function normalizeTypographyEntities(value: string) {
+  return value
+    .replace(/&ldquo;/g, "“")
+    .replace(/&rdquo;/g, "”")
+    .replace(/&lsquo;/g, "‘")
+    .replace(/&rsquo;/g, "’")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&mdash;/g, "—")
+    .replace(/&ndash;/g, "–")
+    .replace(/&hellip;/g, "…")
+}
+
 function getTranslationValue(source: TranslationsDict, path: string, language: "th" | "en") {
   let current: unknown = source
   for (const key of path.split(".")) {
@@ -494,7 +508,7 @@ function getTranslationValue(source: TranslationsDict, path: string, language: "
   }
   if (typeof current !== "object" || current === null) return ""
   const value = (current as Record<string, unknown>)[language]
-  return typeof value === "string" ? value : ""
+  return typeof value === "string" ? normalizeTypographyEntities(value) : ""
 }
 
 function setTranslationValue(
@@ -753,6 +767,13 @@ export function SiteAdminShell() {
               title="หน้าเว็บ"
               description="แก้ข้อความ/รูปภาพ"
               active
+              collapsed={isSidebarCollapsed}
+            />
+            <AdminNavLink
+              href="/admin/manual"
+              icon={<BookOpen className="size-4" />}
+              title="คู่มือ"
+              description="วิธีใช้งานระบบ CMS"
               collapsed={isSidebarCollapsed}
             />
           </div>

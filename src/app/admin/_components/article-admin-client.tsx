@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
   AlertCircle,
+  BookOpen,
   CheckCircle,
   ExternalLink,
   FilePenLine,
@@ -349,6 +350,29 @@ export function ArticleAdminShell({
                     <p className="text-xs font-extrabold">หน้าเว็บ</p>
                     <p className="mt-0.5 text-[10px] leading-relaxed">
                       แก้ข้อความ/รูปภาพ
+                    </p>
+                  </div>
+                )}
+              </div>
+            </Link>
+
+            <Link
+              href="/admin/manual"
+              className={`text-slate-600 hover:bg-slate-50 hover:text-slate-950 ${
+                isSidebarCollapsed
+                  ? "mx-auto flex size-11 items-center justify-center rounded-xl"
+                  : "rounded-xl px-3 py-3"
+              }`}
+            >
+              <div className={`flex items-center ${isSidebarCollapsed ? "justify-center" : "gap-3"}`}>
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                  <BookOpen className="size-4" />
+                </div>
+                {!isSidebarCollapsed && (
+                  <div className="min-w-0">
+                    <p className="text-xs font-extrabold">คู่มือ</p>
+                    <p className="mt-0.5 text-[10px] leading-relaxed">
+                      วิธีใช้งานระบบ CMS
                     </p>
                   </div>
                 )}

@@ -34,6 +34,19 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value)
 }
 
+function normalizeTypographyEntities(value: string) {
+  return value
+    .replace(/&ldquo;/g, "“")
+    .replace(/&rdquo;/g, "”")
+    .replace(/&lsquo;/g, "‘")
+    .replace(/&rsquo;/g, "’")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&mdash;/g, "—")
+    .replace(/&ndash;/g, "–")
+    .replace(/&hellip;/g, "…")
+}
+
 function subscribeToLanguage(callback: () => void) {
   window.addEventListener("storage", callback)
   window.addEventListener(LANGUAGE_CHANGE_EVENT, callback)
@@ -56,7 +69,7 @@ function findTranslation(source: unknown, keyPath: string, language: Language) {
 
   if (!isRecord(current)) return undefined
   const value = current[language]
-  return typeof value === "string" ? value : undefined
+  return typeof value === "string" ? normalizeTypographyEntities(value) : undefined
 }
 
 export function LanguageProvider({
