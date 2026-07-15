@@ -5,7 +5,6 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type { ReactNode } from "react"
 import {
-  ArrowLeft,
   BookOpen,
   Download,
   ExternalLink,
@@ -15,6 +14,26 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import manualContent from "@/lib/admin-manual-content.json"
+
+const HIGHLIGHT_PATTERNS = [
+  {
+    pattern:
+      /(บันทึกแบบร่าง|ดูตัวอย่าง|เผยแพร่หน้าเว็บ|เผยแพร่|เพิ่มรายการใหม่|เลือกรูป|ลบรายการนี้|ออกจากระบบ|ดูหน้าเว็บจริง|ดูหน้าเว็บ|เปิด PDF|ดาวน์โหลด PDF)/g,
+    className: "border-amber-200 bg-amber-100 text-amber-950",
+  },
+  {
+    pattern: /(ปุ่ม|เมนู|ช่อง|หมวด|หน้า Admin|หน้าเว็บ|บทความและข่าวสาร|คู่มือ|ติดต่อเรา|Privacy Policy|Terms of Service|Articles & News)/g,
+    className: "border-sky-200 bg-sky-50 text-sky-900",
+  },
+  {
+    pattern: /(TH|EN|\/login|info@dutyxpert\.com|Google Maps)/g,
+    className: "border-slate-200 bg-slate-100 text-slate-800",
+  },
+  {
+    pattern: /(ราคา|เงื่อนไขบริการ|รายละเอียดบริการ|ข้อมูลลูกค้า|ข้อมูลภายใน|ข้อมูลสำคัญ|ข้อมูลละเอียดอ่อน|รหัสผ่าน)/g,
+    className: "border-red-200 bg-red-50 text-red-800",
+  },
+] as const
 
 export default function AdminManualPage() {
   const router = useRouter()
@@ -102,14 +121,7 @@ export default function AdminManualPage() {
               <div className="relative p-6 sm:p-8">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:3rem_3rem]" />
                 <div className="relative z-10">
-                  <Link
-                    href="/admin"
-                    className="inline-flex items-center text-xs font-bold text-slate-300 transition hover:text-white"
-                  >
-                    <ArrowLeft className="mr-1.5 size-3.5" />
-                    กลับหน้า Admin
-                  </Link>
-                  <p className="mt-6 inline-flex rounded-full bg-amber-400 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-950">
+                  <p className="inline-flex rounded-full bg-amber-400 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-950">
                     Duty Xpert CMS
                   </p>
                   <h1 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
@@ -144,8 +156,11 @@ export default function AdminManualPage() {
               <h2 className="text-lg font-extrabold text-slate-950">สรุปภาพรวม</h2>
               <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
                 {manualContent.summary.map((item) => (
-                  <div key={item} className="rounded-2xl bg-amber-50 p-4 text-sm leading-6 text-amber-950 ring-1 ring-amber-100">
-                    {item}
+                  <div
+                    key={item}
+                    className="rounded-2xl bg-amber-50 p-4 text-sm leading-7 text-amber-950 ring-1 ring-amber-100"
+                  >
+                    {renderHighlightedText(item)}
                   </div>
                 ))}
               </div>
@@ -215,10 +230,49 @@ function ManualList({ items, ordered = false }: { items: string[]; ordered?: boo
   const ListTag = ordered ? "ol" : "ul"
 
   return (
-    <ListTag className={`mt-4 space-y-2 text-sm leading-7 text-slate-600 ${ordered ? "list-decimal pl-5" : "list-disc pl-5"}`}>
+    <ListTag className={`mt-4 space-y-3 text-sm leading-7 text-slate-600 ${ordered ? "list-decimal pl-5 marker:font-extrabold marker:text-amber-600" : "list-disc pl-5 marker:text-amber-500"}`}>
       {items.map((item) => (
-        <li key={item}>{item}</li>
+        <li key={item} className="pl-1">
+          {renderHighlightedText(item)}
+        </li>
       ))}
     </ListTag>
+  )
+}
+
+function renderHighlightedText(text: string) {
+  type Segment = {
+    text: string
+    className?: string
+  }
+
+  let segments: Segment[] = [{ text }]
+
+  for (const { pattern, className } of HIGHLIGHT_PATTERNS) {
+    segments = segments.flatMap((segment) => {
+      if (segment.className) return [segment]
+
+      const parts = segment.text.split(pattern)
+      return parts
+        .filter(Boolean)
+        .map((part) => {
+          pattern.lastIndex = 0
+          return pattern.test(part) ? { text: part, className } : { text: part }
+        })
+    })
+    pattern.lastIndex = 0
+  }
+
+  return segments.map((segment, index) =>
+    segment.className ? (
+      <mark
+        key={`${segment.text}-${index}`}
+        className={`mx-0.5 inline-flex rounded-md border px-1.5 py-0.5 align-baseline text-[0.92em] font-extrabold leading-normal ${segment.className}`}
+      >
+        {segment.text}
+      </mark>
+    ) : (
+      <span key={`${segment.text}-${index}`}>{segment.text}</span>
+    ),
   )
 }
